@@ -1,0 +1,104 @@
+<!-- modules/vestige-character-creator/templates/dialogs/final-details.html -->
+
+<div class="dialog-content">
+  <form>
+    <!-- Personal History -->
+    <h2>Personal History</h2>
+    <div class="field">
+      <label for="identity">Identity</label>
+      <input type="text" name="identity" value="{{characterData.personalHistory?.identity}}" placeholder="What is your character's preferred name, aliases, etc.">
+    </div>
+    <div class="field">
+      <label for="age">Age</label>
+      <input type="number" name="age" value="{{characterData.details.age}}" min="18" max="90">
+    </div>
+    <div class="field">
+      <label for="gender">Gender</label>
+      <input type="text" name="gender" value="{{characterData.details.gender}}">
+    </div>
+    <div class="field">
+      <label for="appearance">Appearance</label>
+      <textarea name="appearance" placeholder="Describe their physical features, mannerisms, style of dress">{{characterData.personalHistory?.appearance}}</textarea>
+    </div>
+    <div class="field">
+      <label for="origins">Origins</label>
+      <textarea name="origins" placeholder="Where did they grow up, and what was their life like before joining the NSB?">{{characterData.personalHistory?.origins}}</textarea>
+    </div>
+    <div class="field">
+      <label for="community">Community</label>
+      <textarea name="community" placeholder="What is their role in society, and do they maintain personal connections?">{{characterData.personalHistory?.community}}</textarea>
+    </div>
+    <div class="field">
+      <label for="motivation">Motivation</label>
+      <textarea name="motivation" placeholder="What drove them to join the NSB or work for the organization?">{{characterData.personalHistory?.motivation}}</textarea>
+    </div>
+
+    <!-- The Weight of Memory -->
+    <h2>The Weight of Memory</h2>
+    <div class="field">
+      <label for="memory-cling-to">A Memory You Cling To</label>
+      <textarea name="memory-cling-to" placeholder="Describe a memory that defines who you are or want to be.">{{characterData.memories?.memoryClingTo}}</textarea>
+    </div>
+    <div class="field">
+      <label for="memory-forget">A Memory You'd Rather Forget</label>
+      <textarea name="memory-forget" placeholder="Describe a memory that haunts you or you wish to forget.">{{characterData.memories?.memoryForget}}</textarea>
+    </div>
+
+    <!-- Additional Considerations -->
+    <h2>Additional Considerations</h2>
+    <div class="field">
+      <label for="personal-traits">Personal Traits</label>
+      <textarea name="personal-traits" placeholder="What habits, quirks, or mannerisms define them?">{{characterData.additionalConsiderations?.personalTraits}}</textarea>
+    </div>
+    <div class="field">
+      <label for="possessions">Possessions</label>
+      <textarea name="possessions" placeholder="What items are essential or meaningful to them?">{{characterData.additionalConsiderations?.possessions}}</textarea>
+    </div>
+    <div class="field">
+      <label for="beliefs">Beliefs</label>
+      <textarea name="beliefs" placeholder="What philosophical or religious beliefs do they hold?">{{characterData.additionalConsiderations?.beliefs}}</textarea>
+    </div>
+    <div class="field">
+      <label for="technology">Technology</label>
+      <textarea name="technology" placeholder="How do they relate to modern technology, especially Daemons?">{{characterData.additionalConsiderations?.technology}}</textarea>
+    </div>
+    <div class="field">
+      <label for="survival">Survival</label>
+      <textarea name="survival" placeholder="How did they experience the White Death and the Null Event?">{{characterData.additionalConsiderations?.survival}}</textarea>
+    </div>
+    <div class="field">
+      <label for="ambitions">Ambitions</label>
+      <textarea name="ambitions" placeholder="What are their goals beyond survival?">{{characterData.additionalConsiderations?.ambitions}}</textarea>
+    </div>
+
+    <!-- Dialog Buttons -->
+    <div class="dialog-buttons">
+      <button type="button" name="back" class="back-button">Back</button>
+      <button type="button" name="save" class="save-button">Save</button>
+    </div>
+  </form>
+</div>
+
+<style>
+ .dialog-content {
+   max-width: 600px;
+   padding: 20px;
+ }
+ .field {
+   margin-bottom: 15px;
+ }
+ textarea, input[type="text"] {
+   width: 100%;
+   padding: 8px;
+   margin-top: 5px;
+ }
+ .dialog-buttons {
+   margin-top: 20px;
+   display: flex;
+   justify-content: space-between;
+ }
+ .back-button, .save-button {
+   padding: 10px 20px;
+   font-size: 16px;
+ }
+</style>

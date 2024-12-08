@@ -1,0 +1,43 @@
+{
+  "id": "vestige-character-creator",
+  "title": "Vestige Character Creator",
+  "description": "A character creation system for the Vestige RPG",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "12"
+  },
+  "authors": [
+    {
+      "name": "Colin McLear",
+      "discord": "LichLife"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js",
+    "scripts/config/attributes.js",
+    "scripts/config/benefits.js",
+    "scripts/config/burdens.js",
+    "scripts/config/professions.js",
+    "scripts/config/upbringing.js",
+    "scripts/config/skills.js",
+    "scripts/views/dialogs/attribute-dialog.js",
+    "scripts/views/dialogs/path-dialog.js",
+    "scripts/views/dialogs/skills-selection-dialog.js",
+    "scripts/views/dialogs/final-details-dialog.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "relationships": {
+    "systems": [{
+      "id": "core100",
+      "type": "system",
+      "manifest": "https://raw.githubusercontent.com/LichFactory-Games/core100/refs/heads/main/system.json"
+    }]
+  },
+  "socket": false,
+  "url": "https://github.com/lichfactory-games/vestige-character-creator",
+  "manifest": "https://raw.githubusercontent.com/lichfactory-games/vestige-character-creator/master/module.json",
+  "download": "https://github.com/lichfactory-games/vestige-character-creator/releases/download/1.0.0/vestige-character-creator.zip"
+}

@@ -1,0 +1,73 @@
+<div class="dialog-content">
+  <form>
+    <div class="section professional-skills">
+      <h2>Professional Skills</h2>
+      <div class="skills-list">
+        {{#each professionalSkills}}
+          <div class="skill-item">
+            <label for="type-{{this.name}}">
+              {{this.name}}
+              {{#if this.type}}<span class="required-type">({{this.type}})</span>{{/if}}
+            </label>
+            <input type="text" name="type-{{this.name}}" class="type-input" placeholder="Enter skill type" data-required="true">
+          </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="section elective-skills">
+      <h2>Elective Skills</h2>
+      <div class="skills-list">
+        {{#each electiveSkills.options}}
+          <div class="skill-item">
+            <label for="elective-{{this.name}}">
+              {{this.name}}
+            </label>
+            <input type="checkbox" name="elective-{{this.name}}" class="elective-checkbox" value="{{this.name}}">
+            {{#if this.requireType}}<span class="type-required">(Requires Type)</span>{{/if}}
+            <input type="text" name="type-{{this.name}}" class="type-input" placeholder="Enter skill type" data-required="true">
+          </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="dialog-buttons">
+      <button type="button" name="back" class="back-button">Back</button>
+      <button type="submit" name="submit" class="submit-button">Next</button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .dialog-content {
+    max-width: 600px;
+    padding: 20px;
+  }
+  .section {
+    margin-bottom: 20px;
+  }
+  .skills-list {
+    margin-left: 20px;
+  }
+  .skill-item {
+    margin-bottom: 10px;
+  }
+  .type-input {
+    margin-left: 10px;
+    padding: 5px;
+    width: 200px;
+  }
+  .required-type, .type-required {
+    color: red;
+    font-style: italic;
+  }
+  .dialog-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .back-button, .submit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+</style>
