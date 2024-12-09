@@ -20,6 +20,13 @@ export class PathDialog extends FormApplication {
     super(characterData, options);
     this.characterData = characterData;
     this.previousDialog = options.previousDialog;
+
+    // Register the helper
+    // Add a helper function to get benefit name by ID
+    Handlebars.registerHelper('getBenefitName', function(benefitId) {
+      const benefit = BENEFITS.find(b => b.id === benefitId);
+      return benefit ? benefit.name : benefitId;
+    });
   }
 
   getData() {
@@ -127,6 +134,9 @@ export class PathDialog extends FormApplication {
         upbringing: formData.upbringing,
         easyBenefit: formData['easy-benefit'] || null
       };
+
+      console.log("Selected upbringing benefit:", formData['easy-benefit']); // Debug log
+
 
       // Proceed to next dialog (Benefits & Burdens)
       const BenefitsBurdensDialog = (await import('./benefits-burdens-dialog.js')).BenefitsBurdensDialog;

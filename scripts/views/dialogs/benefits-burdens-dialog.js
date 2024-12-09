@@ -87,6 +87,11 @@ export class BenefitsBurdensDialog extends FormApplication {
       const selectedBenefits = [];
       const selectedBurdens = [];
 
+      // Add the upbringing benefit if it exists first
+      if (this.characterData.path.easyBenefit) {
+        selectedBenefits.push(this.characterData.path.easyBenefit);
+      }
+
       Object.entries(formData).forEach(([key, value]) => {
         if (value) { // if checkbox is checked
           if (key.startsWith('benefit-')) {
@@ -106,10 +111,17 @@ export class BenefitsBurdensDialog extends FormApplication {
         selectedBurdens.push(...automaticSelections.burdens);
       }
 
+      // Get adjusted benefit limit based on whether we have an easy upbringing
+      const hasEasyUpbringing = Boolean(this.characterData.path.easyBenefit);
+      const adjustedLimit = getBenefitLimit(
+        this.characterData.path.profession,
+        hasEasyUpbringing
+      );
+
       // Validate selections
       const benefitValidation = validateBenefitSelection(
         selectedBenefits,
-        getBenefitLimit(this.characterData.path.profession)
+        adjustedLimit
       );
 
       const burdenValidation = validateBurdenSelection(

@@ -59,11 +59,12 @@ export function applyBenefit(benefitId, characterData) {
   return true;
 }
 
-export function validateBenefitSelection(selectedBenefits, maxBenefits = 3) {
+export function validateBenefitSelection(selectedBenefits, maxBenefits = 4) {
+  // No need to handle upbringingBenefit here since it's already included in selectedBenefits
   if (selectedBenefits.length > maxBenefits) {
     return {
       valid: false,
-      error: `Cannot select more than ${maxBenefits} benefits`
+      error: `Cannot select more than ${maxBenefits} benefits (including upbringing benefit)`
     };
   }
 
@@ -89,6 +90,13 @@ export function validateBenefitSelection(selectedBenefits, maxBenefits = 3) {
   }
 
   return { valid: true };
+}
+
+export function getBenefitLimit(professionKey, hasEasyUpbringing = false) {
+  const restrictions = PROFESSION_RESTRICTIONS[professionKey.toLowerCase()];
+  // If they have an easy upbringing benefit, add 1 to the limit
+  const baseLimit = restrictions?.benefitLimit || 2;
+  return hasEasyUpbringing ? baseLimit + 1 : baseLimit;
 }
 
 export function getBenefitName(benefitId) {
@@ -170,12 +178,6 @@ export function getAvailableBenefits(professionKey) {
 export function getBenefitText(professionKey) {
   const restrictions = PROFESSION_RESTRICTIONS[professionKey.toLowerCase()];
   return restrictions?.benefitText || "Select up to two benefits:";
-}
-
-// Helper function to get benefit limit for a profession
-export function getBenefitLimit(professionKey) {
-  const restrictions = PROFESSION_RESTRICTIONS[professionKey.toLowerCase()];
-  return restrictions?.benefitLimit || 2;
 }
 
 // Helper function to get automatic benefits/burdens

@@ -1,4 +1,5 @@
 import { DIALOG_DEFAULTS } from '../../config/defaults.js';
+import { handleValidationError } from '../../config/utils.js';
 import { calculateSecondaryAttributes, validateAttributeValue, ATTRIBUTES } from '../../config/attributes.js';
 
 export class AttributeDialog extends FormApplication {
@@ -134,8 +135,7 @@ export class AttributeDialog extends FormApplication {
     const hasZeroAttributes = Object.values(this.characterData.attributes.primary)
           .some(value => value === 0);
     if (hasZeroAttributes) {
-      ui.notifications.error("Please set all attributes before continuing");
-      return false;
+      return handleValidationError("Please set all attributes before continuing");
     }
 
     // Transition to PathDialog

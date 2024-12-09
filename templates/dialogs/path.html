@@ -10,27 +10,27 @@
       <p class="description">{{this.description}}</p>
       <div class="effects">
         {{#if this.effects}}
-          {{#if this.effects.attributeBonus}}
-            <p>• +5% to any Primary Attribute</p>
-          {{/if}}
-          {{#if this.effects.gritPenalty}}
-            <p>• -5 points from Grit</p>
-          {{/if}}
-          {{#if this.effects.benefits}}
-            <p>• Choose one benefit:</p>
-            <select name="easy-benefit" class="benefit-select" disabled>
-              <option value="">Select Benefit</option>
-              {{#each this.effects.benefits}}
-                <option value="{{this}}">{{lookup ../benefits this}}</option>
-              {{/each}}
-            </select>
-          {{/if}}
+        {{#if this.effects.attributeBonus}}
+        <p>• +5% to any Primary Attribute</p>
+        {{/if}}
+        {{#if this.effects.gritPenalty}}
+        <p>• -5 points from Grit</p>
+        {{/if}}
+        {{#if this.effects.benefits}}
+        <p>• Choose one benefit:</p>
+        <select name="easy-benefit" class="benefit-select" disabled>
+          <option value="">Select Benefit</option>
+          {{#each this.effects.benefits}}
+          <option value="{{this}}">{{getBenefitName this}}</option>
+          {{/each}}
+        </select>
+        {{/if}}
         {{/if}}
         {{#if this.burdens}}
-          <p>• Choose two burdens from: {{this.burdens}}</p>
+        <p>• Choose two burdens from: {{this.burdens}}</p>
         {{/if}}
         {{#if this.benefits}}
-          <p>• Choose one benefit from: {{this.benefits}}</p>
+        <p>• Choose one benefit from: {{this.benefits}}</p>
         {{/if}}
       </div>
     </div>
@@ -42,7 +42,7 @@
     <select name="profession" required>
       <option value="">Select Profession</option>
       {{#each professions}}
-        <option value="{{@key}}">{{this.name}}</option>
+      <option value="{{@key}}">{{this.name}}</option>
       {{/each}}
     </select>
     <div class="profession-details"></div>
