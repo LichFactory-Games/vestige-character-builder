@@ -1,31 +1,43 @@
 // scripts/views/dialogs/path-dialog.js
-import { DIALOG_DEFAULTS } from '../../config/defaults.js';
+import { BaseDialog } from './base-dialog.js';
 import { PROFESSIONS, validateProfessionRequirements } from '../../config/professions.js';
 import { BENEFITS } from '../../config/benefits.js';
 import { UPBRINGING_CONFIG } from '../../config/upbringing.js';
+import { BenefitsBurdensDialog } from './benefits-burdens-dialog.js';
 
+export class PathDialog extends BaseDialog {
+  constructor(data = {}, options = {}) {
+    super(data, {
+      ...options,
+      nextDialogClass: BenefitsBurdensDialog,
+      validationRules: [
+        // Validate both selections are made
+        (data) => ({
+          valid: data.path?.profession && data.path?.upbringing,
+          error: "Please select both profession and upbringing"
+        }),
+        // Validate profession requirements
+        (data) => {
+          if (!data.path?.profession) return { valid: true };
+          return validateProfessionRequirements(data, data.path.profession);
+        }
+      ]
+    });
 
-export class PathDialog extends FormApplication {
+    // Register Handlebars helper if not already registered
+    if (!Handlebars.helpers.getBenefitName) {
+      Handlebars.registerHelper('getBenefitName', function(benefitId) {
+        const benefit = BENEFITS.find(b => b.id === benefitId);
+        return benefit ? benefit.name : benefitId;
+      });
+    }
+  }
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      ...DIALOG_DEFAULTS,
       template: "modules/vestige-character-creator/templates/dialogs/path.html",
       title: "Choose Your Path",
-      classes: [...DIALOG_DEFAULTS.classes, "path-dialog"]
-    });
-  }
-
-  constructor(characterData, options = {}) {
-    super(characterData, options);
-    this.characterData = characterData;
-    this.previousDialog = options.previousDialog;
-
-    // Register the helper
-    // Add a helper function to get benefit name by ID
-    Handlebars.registerHelper('getBenefitName', function(benefitId) {
-      const benefit = BENEFITS.find(b => b.id === benefitId);
-      return benefit ? benefit.name : benefitId;
+      classes: ["vestige", "dialog", "path-dialog"]
     });
   }
 
@@ -43,56 +55,62 @@ export class PathDialog extends FormApplication {
 
     // Profession change handler
     html.find('[name="profession"]').change(event => {
-      const profKey = event.currentTarget.value;
-      const prof = PROFESSIONS[profKey];
-      if (prof) {
-        const validation = validateProfessionRequirements(this.characterData, profKey);
-        if (!validation.valid) {
-          ui.notifications.warn(validation.error);
-          event.currentTarget.value = '';
-          return;
+      this.handleAsyncOperation(async () => {
+        const profKey = event.currentTarget.value;
+        const prof = PROFESSIONS[profKey];
+        if (prof) {
+          const validation = validateProfessionRequirements(this.characterData, profKey);
+          if (!validation.valid) {
+            ui.notifications.warn(validation.error);
+            event.currentTarget.value = '';
+            return;
+          }
+          this.updateProfessionDetails(html, prof);
+          await this.saveState();
         }
-        this.updateProfessionDetails(html, prof);
-      }
+      }, "Error updating profession");
     });
 
     // Upbringing change handler
     html.find('input[name="upbringing"]').change(event => {
-      const upbringing = event.currentTarget.value;
-      this.updateUpbringingEffects(html, upbringing);
+      this.handleAsyncOperation(async () => {
+        const upbringing = event.currentTarget.value;
+        this.updateUpbringingEffects(html, upbringing);
+        await this.saveState();
+      }, "Error updating upbringing");
     });
   }
 
   updateProfessionDetails(html, profession) {
     const detailsEl = html.find('.profession-details');
     detailsEl.html(`
-      <h3>${profession.name}</h3>
-      <p>${profession.description}</p>
+      <h3>${this.sanitizeHTML(profession.name)}</h3>
+      <p>${this.sanitizeHTML(profession.description)}</p>
       <div class="profession-attributes">
-        <strong>Core Attribute:</strong> ${profession.coreAttribute}
+        <strong>Core Attribute:</strong> ${this.sanitizeHTML(profession.coreAttribute)}
       </div>
       <div class="profession-skills">
         <h4>Professional Skills:</h4>
         <ul>
           ${profession.professionalSkills.map(skill =>
-            `<li>${skill.name}${skill.type ? ` (${skill.type})` : ''}${skill.requireType ? ' (Type Required)' : ''}</li>`
+            `<li>${this.sanitizeHTML(skill.name)}${skill.type ? ` (${this.sanitizeHTML(skill.type)})` : ''}${skill.requireType ? ' (Type Required)' : ''}</li>`
           ).join('')}
         </ul>
         <h4>Elective Skills (Choose ${profession.electiveSkills.count}):</h4>
         <ul>
           ${profession.electiveSkills.options.map(skill =>
-            `<li>${skill.name}${skill.type ? ` (${skill.type})` : ''}${skill.requireType ? ' (Type Required)' : ''}</li>`
+            `<li>${this.sanitizeHTML(skill.name)}${skill.type ? ` (${this.sanitizeHTML(skill.type)})` : ''}${skill.requireType ? ' (Type Required)' : ''}</li>`
           ).join('')}
         </ul>
       </div>
       <div class="profession-resources">
-        <p><strong>Resources:</strong> ${profession.resources} - ${profession.resourceDesc}</p>
-        <p><strong>Ties:</strong> ${profession.ties} - ${profession.tiesDesc}</p>
+        <p><strong>Resources:</strong> ${profession.resources} - ${this.sanitizeHTML(profession.resourceDesc)}</p>
+        <p><strong>Ties:</strong> ${profession.ties} - ${this.sanitizeHTML(profession.tiesDesc)}</p>
       </div>
       <div class="profession-equipment">
         <h4>Starting Equipment:</h4>
         <ul>
-          ${profession.equipment.map(item => `<li>${item}</li>`).join('')}
+          ${profession.equipment.map(item => `<li>${this.sanitizeHTML(item)}</li>`).join('')}
         </ul>
       </div>
     `);
@@ -106,7 +124,6 @@ export class PathDialog extends FormApplication {
     benefitSelect.prop('disabled', upbringing !== 'easy');
 
     if (upbringing === 'traumatic') {
-      // Show burden selection
       html.find('.burden-selection').show();
     } else {
       html.find('.burden-selection').hide();
@@ -114,43 +131,14 @@ export class PathDialog extends FormApplication {
   }
 
   async _updateObject(event, formData) {
-    try {
-      // Validate selections
-      if (!formData.profession || !formData.upbringing) {
-        ui.notifications.error("Please select both profession and upbringing");
-        return false;
-      }
+    // Update character data before validation
+    this.characterData.path = {
+      profession: formData.profession,
+      upbringing: formData.upbringing,
+      easyBenefit: formData['easy-benefit'] || null
+    };
 
-      // Validate profession requirements
-      const validation = validateProfessionRequirements(this.characterData, formData.profession);
-      if (!validation.valid) {
-        ui.notifications.error(validation.error);
-        return false;
-      }
-
-      // Update character data
-      this.characterData.path = {
-        profession: formData.profession,
-        upbringing: formData.upbringing,
-        easyBenefit: formData['easy-benefit'] || null
-      };
-
-      console.log("Selected upbringing benefit:", formData['easy-benefit']); // Debug log
-
-
-      // Proceed to next dialog (Benefits & Burdens)
-      const BenefitsBurdensDialog = (await import('./benefits-burdens-dialog.js')).BenefitsBurdensDialog;
-      new BenefitsBurdensDialog(this.characterData, {
-        previousDialog: this
-      }).render(true);
-
-      return true;
-    } catch (error) {
-      console.error("Error in PathDialog._updateObject:", error);
-      ui.notifications.error("An error occurred. Please try again.");
-      return false;
-    }
+    // Base class handles validation, state saving, and navigation
+    return super._updateObject(event, formData);
   }
 }
-
-
