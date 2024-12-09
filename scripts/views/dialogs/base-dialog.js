@@ -42,17 +42,29 @@ export class BaseDialog extends FormApplication {
 
   // State management
   async saveState() {
-    const key = `vestige-character-creator-state-${this.characterData?.name || 'unnamed'}`;
-    await game.settings.set('vestige-character-creator', key, this.characterData);
+    try {
+      const states = game.settings.get('vestige-character-creator', 'character-states') || {};
+      const stateKey = this.characterData?.name || 'unnamed';
+      states[stateKey] = this.characterData;
+      await game.settings.set('vestige-character-creator', 'character-states', states);
+    } catch (error) {
+      console.warn('Failed to save character state:', error);
+    }
   }
 
   async loadState() {
-    const key = `vestige-character-creator-state-${this.characterData?.name || 'unnamed'}`;
-    const savedState = await game.settings.get('vestige-character-creator', key);
-    if (savedState) {
-      this.characterData = foundry.utils.mergeObject(this.characterData, savedState);
+    try {
+      const states = game.settings.get('vestige-character-creator', 'character-states') || {};
+      const stateKey = this.characterData?.name || 'unnamed';
+      const savedState = states[stateKey];
+      if (savedState) {
+        this.characterData = foundry.utils.mergeObject(this.characterData, savedState);
+      }
+    } catch (error) {
+      console.warn('Failed to load character state:', error);
     }
   }
+
 
   // Enhanced validation system
   async validate() {
@@ -138,5 +150,37 @@ export class BaseDialog extends FormApplication {
   validateNumericInput(value, min = 0, max = 100) {
     const num = parseInt(value);
     return isNaN(num) ? min : Math.max(min, Math.min(max, num));
+  }
+
+  // Update Object
+  async _updateObject(event, formData) {
+    try {
+      // Run validation
+      const validation = await this.validate();
+
+      if (!validation.valid) {
+        validation.errors.forEach(error =>
+          ui.notifications.error(error)
+        );
+        return false;
+      }
+
+      // Save state before proceeding
+      await this.saveState();
+
+      // Move to next dialog if validation passed
+      if (this.nextDialogClass) {
+        new this.nextDialogClass(this.characterData, {
+          previousDialog: this
+        }).render(true);
+        this.close();
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Update object error:", error);
+      ui.notifications.error("An error occurred. Your progress has been saved.");
+      return false;
+    }
   }
 }

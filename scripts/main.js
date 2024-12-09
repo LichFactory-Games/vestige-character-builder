@@ -11,6 +11,15 @@ import { PathDialog } from './views/dialogs/path-dialog.js';
 Hooks.once('init', async function() {
   console.log('Initializing Vestige Character Creator');
 
+  // Register module settings
+  game.settings.register('vestige-character-creator', 'character-states', {
+    name: 'Character Creation States',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: {}
+  });
+
   game.vestige = {
     config: {
       ATTRIBUTES,

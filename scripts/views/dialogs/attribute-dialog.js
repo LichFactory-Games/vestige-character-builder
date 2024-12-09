@@ -156,8 +156,14 @@ export class AttributeDialog extends BaseDialog {
     );
   }
 
+
   async _updateObject(event, formData) {
-    // Base class handles validation and navigation
+    // Update any form data if needed before calling parent
+    if (formData.name) {
+      this.characterData.name = formData.name;
+    }
+
     return super._updateObject(event, formData);
   }
+
 }
