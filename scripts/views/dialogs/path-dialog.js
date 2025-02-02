@@ -130,15 +130,31 @@ export class PathDialog extends BaseDialog {
     }
   }
 
+  // In PathDialog class
   async _updateObject(event, formData) {
-    // Update character data before validation
-    this.characterData.path = {
-      profession: formData.profession,
-      upbringing: formData.upbringing,
+    // Ensure we're creating a valid path object
+    const pathData = {
+      profession: formData.profession || null,
+      upbringing: formData.upbringing || null,
       easyBenefit: formData['easy-benefit'] || null
     };
 
+    // Update character data with valid path
+    if (!this.characterData.path) {
+      this.characterData.path = pathData;
+    } else {
+      Object.assign(this.characterData.path, pathData);
+    }
+
     // Base class handles validation, state saving, and navigation
-    return super._updateObject(event, formData);
+    const result = await super._updateObject(event, formData);
+
+    // Double check we have valid data before proceeding
+    if (result && (!this.characterData.path?.profession || !this.characterData.path?.upbringing)) {
+      ui.notifications.error("Invalid path data");
+      return false;
+    }
+
+    return result;
   }
 }
