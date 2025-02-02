@@ -130,31 +130,51 @@ export class PathDialog extends BaseDialog {
     }
   }
 
-  // In PathDialog class
   async _updateObject(event, formData) {
-    // Ensure we're creating a valid path object
-    const pathData = {
-      profession: formData.profession || null,
-      upbringing: formData.upbringing || null,
-      easyBenefit: formData['easy-benefit'] || null
-    };
+    try {
+      // Ensure we're creating a valid path object
+      const pathData = {
+        profession: formData.profession || null,
+        upbringing: formData.upbringing || null,
+        easyBenefit: formData['easy-benefit'] || null
+      };
 
-    // Update character data with valid path
-    if (!this.characterData.path) {
-      this.characterData.path = pathData;
-    } else {
-      Object.assign(this.characterData.path, pathData);
-    }
+      // Validate required data
+      if (!pathData.profession || !pathData.upbringing) {
+        console.error("Missing required path data:", pathData);
+        ui.notifications.error("Please select both profession and upbringing");
+        return false;
+      }
 
-    // Base class handles validation, state saving, and navigation
-    const result = await super._updateObject(event, formData);
+      // Update character data with valid path
+      if (!this.characterData.path) {
+        this.characterData.path = pathData;
+      } else {
+        Object.assign(this.characterData.path, pathData);
+      }
 
-    // Double check we have valid data before proceeding
-    if (result && (!this.characterData.path?.profession || !this.characterData.path?.upbringing)) {
-      ui.notifications.error("Invalid path data");
+      // Save state before proceeding
+      await this.saveState();
+
+      // Create and render next dialog with error handling
+      try {
+        new BenefitsBurdensDialog(this.characterData, {
+          previousDialog: this
+        }).render(true);
+        this.close();
+      } catch (error) {
+        console.error("Error creating benefits dialog:", error);
+        ui.notifications.error("Error proceeding to benefits selection");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error updating path:", error);
+      ui.notifications.error("Failed to save path selection");
       return false;
     }
-
-    return result;
   }
+
+
 }

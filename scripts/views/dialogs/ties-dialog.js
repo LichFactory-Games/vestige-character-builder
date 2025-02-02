@@ -94,14 +94,29 @@ export class TiesDialog extends FormApplication {
   }
 
   updateRemainingPoints(html) {
-    let usedPoints = 0;
-    html.find('.tie-strength').each(function() {
-      usedPoints += parseInt($(this).val()) || 0;
-    });
+    try {
+      let usedPoints = 0;
+      html.find('.tie-strength').each(function() {
+        const value = parseInt($(this).val()) || 0;
+        if (value < 0 || value > 100) {
+          throw new Error("Tie strength must be between 0 and 100");
+        }
+        usedPoints += value;
+      });
 
-    const remaining = this.characterData.ties.totalPoints - usedPoints;
-    html.find('.remaining-points').text(remaining);
-    this.characterData.ties.remaining = remaining;
+      const remaining = this.characterData.ties.totalPoints - usedPoints;
+      if (remaining < 0) {
+        ui.notifications.error("Total tie strength exceeds available points");
+        return false;
+      }
+
+      html.find('.remaining-points').text(remaining);
+      this.characterData.ties.remaining = remaining;
+    } catch (error) {
+      console.error("Error updating points:", error);
+      ui.notifications.error(error.message);
+      return false;
+    }
   }
 
   async _updateObject(event, formData) {

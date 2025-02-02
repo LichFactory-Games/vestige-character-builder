@@ -75,12 +75,24 @@ export class AttributeDialog extends BaseDialog {
   }
 
   _onAttributeChange(event) {
-    const input = event.currentTarget;
-    const attr = input.name;
-    const value = validateAttributeValue(input.value);
-    this.characterData.attributes.primary[attr] = value;
-    this._updateSecondaryAttributes();
-    this.saveState();
+    try {
+      const input = event.currentTarget;
+      const attr = input.name;
+      const value = validateAttributeValue(input.value);
+
+      if (value === 0) {
+        ui.notifications.error(`Invalid value for ${attr.toUpperCase()}`);
+        input.value = this.characterData.attributes.primary[attr];
+        return;
+      }
+
+      this.characterData.attributes.primary[attr] = value;
+      this._updateSecondaryAttributes();
+      this.saveState();
+    } catch (error) {
+      console.error("Error updating attribute:", error);
+      ui.notifications.error("Error updating attribute value");
+    }
   }
 
   async _onUseArray(event) {

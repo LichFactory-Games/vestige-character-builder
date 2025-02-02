@@ -65,67 +65,115 @@ export class SkillSelectionDialog extends FormApplication {
   async _updateObject(event, formData) {
     try {
       const profession = this.characterData.path.profession;
+      if (!profession) {
+        console.error("No profession found in character data");
+        ui.notifications.error("Character profession not found");
+        return false;
+      }
+
       const professionSkills = PROFESSION_SKILLS[profession];
+      if (!professionSkills) {
+        console.error(`No skill configuration found for profession: ${profession}`);
+        ui.notifications.error("Profession skill configuration not found");
+        return false;
+      }
 
       // Collect professional skills with their types
-      const professionalSkills = professionSkills.professionalSkills.map(skill => {
+      const professionalSkills = [];
+      for (const skill of professionSkills.professionalSkills) {
         const type = formData[`type-${skill.name}`];
-        return {
+
+        // Validate required skill types
+        if (skill.requireType && !type) {
+          console.error(`Missing required type for skill: ${skill.name}`);
+          ui.notifications.error(`Please specify a type for ${skill.name}`);
+          return false;
+        }
+
+        professionalSkills.push({
           name: skill.name,
-          type: type || null
-        };
-      });
+          type: type || null,
+          requireType: skill.requireType || false
+        });
+      }
 
       // Collect elective skills with their types
       const electiveSkills = [];
-      Object.entries(formData)
-        .filter(([key]) => key.startsWith('elective-'))
-        .forEach(([key, value]) => {
-          if (value) {
-            const skillName = key.replace('elective-', '');
-            const type = formData[`type-${skillName}`];
-            electiveSkills.push({
-              name: skillName,
-              type: type || null
-            });
-          }
-        });
+      const selectedElectives = Object.entries(formData)
+            .filter(([key, value]) => key.startsWith('elective-') && value);
 
-      // Validate skills
+      // Validate number of elective selections
+      if (selectedElectives.length !== professionSkills.electiveSkills.count) {
+        console.error(`Invalid number of elective skills selected. Expected: ${professionSkills.electiveSkills.count}, Got: ${selectedElectives.length}`);
+        ui.notifications.error(`Please select exactly ${professionSkills.electiveSkills.count} elective skills`);
+        return false;
+      }
+
+      // Process elective skills
+      for (const [key, value] of selectedElectives) {
+        const skillName = key.replace('elective-', '');
+        const type = formData[`type-${skillName}`];
+
+        // Validate skill exists in options
+        const skillOption = professionSkills.electiveSkills.options.find(o => o.name === skillName);
+        if (!skillOption) {
+          console.error(`Invalid elective skill selected: ${skillName}`);
+          ui.notifications.error(`Invalid skill selection: ${skillName}`);
+          return false;
+        }
+
+        // Validate required types for electives
+        if (skillOption.requireType && !type) {
+          console.error(`Missing required type for elective skill: ${skillName}`);
+          ui.notifications.error(`Please specify a type for ${skillName}`);
+          return false;
+        }
+
+        electiveSkills.push({
+          name: skillName,
+          type: type || null,
+          requireType: skillOption.requireType || false
+        });
+      }
+
+      // Final validation of all skills
       const validation = this.validateSkills(professionalSkills, electiveSkills);
       if (!validation.valid) {
+        console.error("Skills validation error:", validation.error);
         ui.notifications.error(validation.error);
         return false;
       }
 
-      // Update character data with professional and elective skills
+      // Update character data
       this.characterData.skills = {
-        professional: professionalSkills.map(skill => ({
-          name: skill.name,
-          type: skill.type || null,
-          requireType: skill.requireType || false
-        })),
-        elective: electiveSkills.map(skill => ({
-          name: skill.name,
-          type: skill.type || null,
-          requireType: skill.requireType || false
-        }))
+        professional: professionalSkills,
+        elective: electiveSkills
       };
 
-      // Proceed to the next dialog (e.g., Ties)
-      const TiesDialog = (await import('./ties-dialog.js')).TiesDialog;
-      new TiesDialog(this.characterData, {
-        previousDialog: this
-      }).render(true);
+      try {
+        // Save state before proceeding
+        await this.saveState();
 
-      return true;
+        // Load and render next dialog
+        const TiesDialog = (await import('./ties-dialog.js')).TiesDialog;
+        new TiesDialog(this.characterData, {
+          previousDialog: this
+        }).render(true);
+
+        return true;
+      } catch (error) {
+        console.error("Error proceeding to next dialog:", error);
+        ui.notifications.error("Error saving progress. Please try again.");
+        return false;
+      }
 
     } catch (error) {
       console.error("Error processing skills:", error);
-      ui.notifications.error("An error occurred while updating skills.");
+      ui.notifications.error("An error occurred while processing skills. Please try again.");
       return false;
     }
   }
+
 
   validateSkills(professionalSkills, electiveSkills) {
     const profession = this.characterData.path.profession;

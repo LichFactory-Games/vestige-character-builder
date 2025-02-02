@@ -44,6 +44,17 @@ export class BenefitsBurdensDialog extends BaseDialog {
       ]
     });
 
+    // Validate required data
+    if (!this.characterData?.path?.profession) {
+      console.error("Missing required profession data:", this.characterData);
+      ui.notifications.error("Character profession data is missing");
+      // Return to previous dialog if available
+      if (this.previousDialog) {
+        this.previousDialog.render(true);
+      }
+      return;
+    }
+
     // Register Handlebars helpers if not already registered
     if (!Handlebars.helpers.getBenefitName) {
       Handlebars.registerHelper('getBenefitName', (benefitId) => {
@@ -69,14 +80,59 @@ export class BenefitsBurdensDialog extends BaseDialog {
   }
 
   getData() {
-    const profession = this.characterData.path.profession;
+    try {
+      // Validate character data exists
+      if (!this.characterData) {
+        console.error("No character data found");
+        ui.notifications.error("Character data not found");
+        return this.getDefaultData();
+      }
+
+      // Validate path exists
+      if (!this.characterData.path) {
+        console.error("No path data found in character data");
+        ui.notifications.error("Character path data not found");
+        return this.getDefaultData();
+      }
+
+      // Validate profession exists
+      const profession = this.characterData.path.profession;
+      if (!profession) {
+        console.error("No profession found in path data");
+        ui.notifications.error("Character profession not found");
+        return this.getDefaultData();
+      }
+
+      try {
+        return {
+          characterData: this.characterData,
+          availableBenefits: getAvailableBenefits(profession),
+          benefitsText: getBenefitText(profession),
+          automaticSelections: getAutomaticSelections(profession),
+          availableBurdens: getAvailableBurdens(profession),
+          burdenRequirements: getBurdenRequirements(profession)
+        };
+      } catch (configError) {
+        console.error("Error getting profession configuration:", configError);
+        ui.notifications.error("Error loading profession data");
+        return this.getDefaultData();
+      }
+    } catch (error) {
+      console.error("Error in getData:", error);
+      ui.notifications.error("Failed to load character data");
+      return this.getDefaultData();
+    }
+  }
+
+  // Helper method to provide safe default data
+  getDefaultData() {
     return {
-      characterData: this.characterData,
-      availableBenefits: getAvailableBenefits(profession),
-      benefitsText: getBenefitText(profession),
-      automaticSelections: getAutomaticSelections(profession),
-      availableBurdens: getAvailableBurdens(profession),
-      burdenRequirements: getBurdenRequirements(profession)
+      characterData: this.characterData || {},
+      availableBenefits: [],
+      benefitsText: "Error loading benefits",
+      automaticSelections: { benefits: [], burdens: [] },
+      availableBurdens: [],
+      burdenRequirements: { count: 0 }
     };
   }
 
@@ -167,5 +223,38 @@ export class BenefitsBurdensDialog extends BaseDialog {
 
     // Base class handles validation, state saving, and navigation
     return super._updateObject(event, formData);
+  }
+
+  // Add this method to BenefitsBurdensDialog class
+
+  async _render(force = false, options = {}) {
+    try {
+      // Validate required data before attempting render
+      if (!this.characterData?.path?.profession) {
+        console.error("Missing profession data during render");
+        ui.notifications.error("Unable to display benefits selection - missing data");
+
+        // Return to previous dialog if available
+        if (this.previousDialog) {
+          this.previousDialog.render(true);
+          this.close(options);
+        }
+        return false;
+      }
+
+      // If validation passes, proceed with normal render
+      return await super._render(force, options);
+
+    } catch (error) {
+      console.error("Error rendering benefits dialog:", error);
+      ui.notifications.error("Failed to display benefits selection");
+
+      // Return to previous dialog if available
+      if (this.previousDialog) {
+        this.previousDialog.render(true);
+        this.close(options);
+      }
+      return false;
+    }
   }
 }

@@ -136,7 +136,7 @@ export class BaseDialog extends FormApplication {
     } catch (error) {
       console.error(error);
       ui.notifications.error(errorMessage);
-      return false;
+      return false; // Prevent dialog from closing
     }
   }
 
@@ -159,28 +159,47 @@ export class BaseDialog extends FormApplication {
       const validation = await this.validate();
 
       if (!validation.valid) {
-        validation.errors.forEach(error =>
-          ui.notifications.error(error)
-        );
-        return false;
+        validation.errors.forEach(error => {
+          console.error("Validation error:", error);
+          ui.notifications.error(error);
+        });
+        return false; // Prevent dialog from closing
       }
 
       // Save state before proceeding
       await this.saveState();
 
-      // Move to next dialog if validation passed
+      // Only proceed to next dialog if validation passed
       if (this.nextDialogClass) {
-        new this.nextDialogClass(this.characterData, {
-          previousDialog: this
-        }).render(true);
-        this.close();
+        try {
+          const nextDialog = new this.nextDialogClass(this.characterData, {
+            previousDialog: this
+          });
+
+          // Try to render the next dialog but catch any errors
+          const renderSuccess = await nextDialog.render(true).catch(error => {
+            console.error("Error rendering next dialog:", error);
+            ui.notifications.error("Failed to proceed to next step");
+            return false;
+          });
+
+          // Only close current dialog if next one rendered successfully
+          if (renderSuccess !== false) {
+            this.close();
+          }
+        } catch (error) {
+          console.error("Error creating next dialog:", error);
+          ui.notifications.error("Failed to proceed to next step");
+          return false; // Prevent dialog from closing
+        }
       }
 
       return true;
     } catch (error) {
       console.error("Update object error:", error);
       ui.notifications.error("An error occurred. Your progress has been saved.");
-      return false;
+      return false; // Prevent dialog from closing
     }
   }
+  
 }
