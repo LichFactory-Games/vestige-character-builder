@@ -4,62 +4,36 @@ import { CharacterCreatorDialog } from './dialog.js';
 import * as Helpers from './config/helpers.js';
 
 Hooks.once('init', () => {
-  // Register custom Handlebars helpers
-  Handlebars.registerHelper('eq', function(a, b) {
-    return a === b;
-  });
-
-  Handlebars.registerHelper('includes', function(array, item) {
-    return Array.isArray(array) && array.includes(item);
-  });
-
-  Handlebars.registerHelper('times', function(n, options) {
-    let result = '';
-    for (let i = 0; i < n; i++) {
-      result += options.fn({ index: i });
+  // Register Handlebars helpers first
+  Handlebars.registerHelper({
+    eq: (a, b) => a === b,
+    includes: (array, item) => Array.isArray(array) && array.includes(item),
+    times: function(n, options) {
+      let result = '';
+      for (let i = 0; i < n; i++) {
+        result += options.fn({ index: i });
+      }
+      return result;
+    },
+    add: (a, b) => parseInt(a) + parseInt(b),
+    multiply: (a, b) => parseInt(a) * parseInt(b),
+    default: (value, defaultValue) => value != null ? value : defaultValue,
+    getBenefitsForProfession: professionKey => Helpers.getBenefitsForProfession(professionKey),
+    getBurdensForProfession: professionKey => Helpers.getBurdensForProfession(professionKey),
+    findBurden: burdenId => CHARACTER_DATA.burdens.list.find(b => b.id === burdenId),
+    // Changed to regular function for arguments access
+    lookup: function(obj, key, prop) {
+      if (arguments.length === 2) {
+        return obj?.[key];
+      }
+      return obj?.[key]?.[prop];
     }
-    return result;
   });
 
-  Handlebars.registerHelper('add', function(a, b) {
-    return parseInt(a) + parseInt(b);
-  });
-
-  Handlebars.registerHelper('multiply', function(a, b) {
-    return parseInt(a) * parseInt(b);
-  });
-
-  Handlebars.registerHelper('default', function(value, defaultValue) {
-    return value != null ? value : defaultValue;
-  });
-
-  Handlebars.registerHelper('getBenefitsForProfession', function(professionKey) {
-    return Helpers.getBenefitsForProfession(professionKey);
-  });
-
-  Handlebars.registerHelper('getBurdensForProfession', function(professionKey) {
-    return Helpers.getBurdensForProfession(professionKey);
-  });
-
-  Handlebars.registerHelper('findBurden', function(burdenId) {
-    return CHARACTER_DATA.burdens.list.find(b => b.id === burdenId);
-  });
-
-  // Lookup helper for nested objects
-  Handlebars.registerHelper('lookup', function(obj, key, prop) {
-    if (arguments.length === 2) {
-      return obj?.[key];
-    }
-    return obj?.[key]?.[prop];
-  });
-
-  // Register module configuration
-  CONFIG.VESTIGE = CHARACTER_DATA;
-
-  // Register module API
+  // Add API to game object
   game.vestige = {
     createCharacter: () => new CharacterCreatorDialog().render(true),
-    config: CHARACTER_DATA,
+    data: CHARACTER_DATA,
     helpers: Helpers
   };
 });

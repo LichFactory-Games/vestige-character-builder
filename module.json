@@ -13,9 +13,9 @@
     }
   ],
   "esmodules": [
-    "scripts/creator.js"
+    "scripts/main.js"
   ],
   "styles": [
-    "styles/creator.css"
+    "styles/styles.css"
   ]
 }
