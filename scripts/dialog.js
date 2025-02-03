@@ -45,7 +45,7 @@ export class CharacterCreatorDialog extends FormApplication {
 
     console.log('Tabs:', this._tabs);
 
-
+    // Navigation
     html.find('.prev-step').click(() => {
       console.log('Previous clicked', this._tabs);
       this._onNavigate(-1);
@@ -56,9 +56,23 @@ export class CharacterCreatorDialog extends FormApplication {
       this._onNavigate(1);
     });
 
+    // Attributes
     html.find('.attribute-input').change(e => this._onAttributeChange(e));
     html.find('.roll-attributes').click(e => this._onRollAttributes(e));
     html.find('.use-array').click(e => this._onUseArray(e));
+
+    // Path
+    html.find('select[name="path.profession"]').change(e => {
+      this.character.path = this.character.path || {};
+      this.character.path.profession = e.target.value;
+      this.render();
+    });
+
+    html.find('input[name="path.upbringing"]').change(e => {
+      this.character.path = this.character.path || {};
+      this.character.path.upbringing = e.target.value;
+      this.render();
+    });
   }
 
   _onNavigate(direction) {

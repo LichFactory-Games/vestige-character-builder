@@ -86,7 +86,24 @@
           </option>
           {{/each}}
         </select>
-        <div class="profession-details"></div>
+        {{#if character.path.profession}}
+        <div class="profession-details">
+          {{#with (lookup config.professions character.path.profession)}}
+          <h4>{{name}}</h4>
+          <p>{{description}}</p>
+          <p><strong>Core Attribute:</strong> {{coreAttribute}}</p>
+          <p><strong>Resources:</strong> {{resources}} ({{resourceDesc}})</p>
+          <p><strong>Ties:</strong> {{ties}} ({{tiesDesc}})</p>
+
+          <h4>Equipment</h4>
+          <ul>
+            {{#each equipment}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+          {{/with}}
+        </div>
+        {{/if}}
       </div>
     </div>
 
