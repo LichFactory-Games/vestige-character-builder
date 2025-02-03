@@ -43,9 +43,32 @@ export class CharacterCreatorDialog extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
+    console.log('Tabs:', this._tabs);
+
+
+    html.find('.prev-step').click(() => {
+      console.log('Previous clicked', this._tabs);
+      this._onNavigate(-1);
+    });
+
+    html.find('.next-step').click(() => {
+      console.log('Next clicked', this._tabs);
+      this._onNavigate(1);
+    });
+
     html.find('.attribute-input').change(e => this._onAttributeChange(e));
     html.find('.roll-attributes').click(e => this._onRollAttributes(e));
     html.find('.use-array').click(e => this._onUseArray(e));
+  }
+
+  _onNavigate(direction) {
+    const tabs = ['attributes', 'path', 'skills', 'benefits', 'ties', 'details'];
+    const currentTab = this._tabs[0].active;
+    const currentIndex = tabs.indexOf(currentTab);
+    const newIndex = Math.max(0, Math.min(tabs.length - 1, currentIndex + direction));
+
+    // Use Foundry's tab activation method directly
+    this._tabs[0].activate(tabs[newIndex], {triggerCallback: true});
   }
 
   _onAttributeChange(event) {
