@@ -13,6 +13,11 @@ export class CharacterCreatorDialog extends FormApplication {
           prs: 50
         },
         secondary: {}
+      },
+      path: {},
+      upbringing: {
+        benefits: [],
+        burdens: []
       }
     };
   }
@@ -71,6 +76,36 @@ export class CharacterCreatorDialog extends FormApplication {
     html.find('input[name="path.upbringing"]').change(e => {
       this.character.path = this.character.path || {};
       this.character.path.upbringing = e.target.value;
+      this.render();
+    });
+
+    html.find('input[name="upbringing.benefits"]').change(e => {
+      const maxCount = this.getUpbringingBenefitsCount();
+      const checkedBoxes = html.find('input[name="upbringing.benefits"]:checked');
+
+      if (checkedBoxes.length > maxCount) {
+        e.preventDefault();
+        e.target.checked = false;
+        return;
+      }
+
+      this.character.upbringing = this.character.upbringing || {};
+      this.character.upbringing.benefits = Array.from(checkedBoxes).map(cb => cb.value);
+      this.render();
+    });
+
+    html.find('input[name="upbringing.burdens"]').change(e => {
+      const maxCount = this.getUpbringingBurdensCount();
+      const checkedBoxes = html.find('input[name="upbringing.burdens"]:checked');
+
+      if (checkedBoxes.length > maxCount) {
+        e.preventDefault();
+        e.target.checked = false;
+        return;
+      }
+
+      this.character.upbringing = this.character.upbringing || {};
+      this.character.upbringing.burdens = Array.from(checkedBoxes).map(cb => cb.value);
       this.render();
     });
   }
@@ -195,4 +230,23 @@ export class CharacterCreatorDialog extends FormApplication {
     this._updateSecondaryAttributes();
     this.render();
   }
+
+  getUpbringingBenefitsCount() {
+    const upbringing = this.character?.path?.upbringing;
+    if (!upbringing) return 0;
+
+    // Access benefits either from effects or directly
+    const upbringingData = CHARACTER_DATA.upbringing.types[upbringing];
+    return upbringingData?.effects?.benefits?.count || upbringingData?.benefits?.count || 0;
+  }
+
+  getUpbringingBurdensCount() {
+    const upbringing = this.character?.path?.upbringing;
+    if (!upbringing) return 0;
+
+    const upbringingData = CHARACTER_DATA.upbringing.types[upbringing];
+    return upbringingData?.burdens?.count || 0;
+  }
+
+
 }

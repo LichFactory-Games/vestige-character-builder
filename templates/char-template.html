@@ -72,6 +72,81 @@
           <p class="description">{{this.description}}</p>
         </div>
         {{/each}}
+
+        {{#with (lookup config.upbringing.types character.path.upbringing)}}
+  {{#if effects.benefits}}
+  <div class="upbringing-benefits">
+    <h4>Choose {{effects.benefits.count}} Benefit(s):</h4>
+    {{#each effects.benefits.options}}
+    <div class="benefit-option">
+      <label>
+        <input type="checkbox"
+               name="upbringing.benefits"
+               value="{{this}}"
+               {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
+        {{#with (findBenefit this)}}
+          {{name}}
+        {{/with}}
+      </label>
+      <p class="hint">
+        {{#with (findBenefit this)}}
+          {{desc}}
+        {{/with}}
+      </p>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if benefits}} {{!-- For traumatic upbringing --}}
+  <div class="upbringing-benefits">
+    <h4>Choose {{benefits.count}} Benefit(s):</h4>
+    {{#each benefits.options}}
+    <div class="benefit-option">
+      <label>
+        <input type="checkbox"
+               name="upbringing.benefits"
+               value="{{this}}"
+               {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
+        {{#with (findBenefit this)}}
+          {{name}}
+        {{/with}}
+      </label>
+      <p class="hint">
+        {{#with (findBenefit this)}}
+          {{desc}}
+        {{/with}}
+      </p>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if burdens}}
+  <div class="upbringing-burdens">
+    <h4>Choose {{burdens.count}} Burden(s):</h4>
+    {{#each burdens.options}}
+    <div class="burden-option">
+      <label>
+        <input type="checkbox"
+               name="upbringing.burdens"
+               value="{{this}}"
+               {{#if (includes ../../character.upbringing.burdens this)}}checked{{/if}}>
+        {{#with (findBurden this)}}
+          {{name}}
+        {{/with}}
+      </label>
+      <p class="hint">
+        {{#with (findBurden this)}}
+          {{desc}}
+        {{/with}}
+      </p>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+{{/with}}
+
       </div>
 
       <!-- Profession Selection -->
@@ -109,16 +184,16 @@
 
 
     <!-- Skills Tab -->
-<div class="tab" data-tab="skills" data-group="sections">
-    <h3>Professional Skills</h3>
-    {{#if character.path.profession}}
-        <div class="skills-list">
-            <p>Current Profession: {{character.path.profession}}</p>
-        </div>
-    {{else}}
-        <p>Please select a profession first</p>
-    {{/if}}
-</div>
+    <div class="tab" data-tab="skills" data-group="sections">
+      <h3>Professional Skills</h3>
+      {{#if character.path.profession}}
+      <div class="skills-list">
+        <p>Current Profession: {{character.path.profession}}</p>
+      </div>
+      {{else}}
+      <p>Please select a profession first</p>
+      {{/if}}
+    </div>
 
 
     <!-- Benefits & Burdens Tab -->

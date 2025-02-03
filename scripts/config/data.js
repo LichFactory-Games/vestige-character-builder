@@ -136,7 +136,10 @@ export const CHARACTER_DATA = {
           { name: "Tactics", type: null }
         ]
       },
-      benefits: ["fleetOfFoot", "ironBody", "quickReflexes", "sharpSenses", "unshakableNerves"],
+      benefits: {
+        count: 1,
+        options: ["fleetOfFoot", "ironBody", "quickReflexes", "sharpSenses", "unshakableNerves"]
+      },
       burdens: { required: ["duty"] },
       resources: 40,
       resourceDesc: "Stable; Restricted government salary and equipment",
@@ -178,7 +181,10 @@ export const CHARACTER_DATA = {
           { name: "Religion", type: null }
         ]
       },
-      benefits: ["gutInstinct", "hawkEye", "keenMind", "walkingEncyclopedia"],
+      benefits: {
+        count: 1,
+        options: ["gutInstinct", "hawkEye", "keenMind", "walkingEncyclopedia"]
+      },
       burdens: {
         count: 1,
         options: ["absentMinded", "nosy", "obsessive"]
@@ -221,7 +227,10 @@ export const CHARACTER_DATA = {
           { name: "Profiling", type: null }
         ]
       },
-      benefits: ["guardian", "ironWill", "steelConstitution", "unshakableNerves"],
+      benefits: {
+        count: 1,
+        options: ["guardian", "ironWill", "steelConstitution", "unshakableNerves"]
+      },
       burdens: {
         count: 1,
         options: ["duty", "moralDuty", "squeamish"]
@@ -266,7 +275,10 @@ export const CHARACTER_DATA = {
           { name: "Security Systems", type: null }
         ]
       },
-      benefits: ["creativeMind", "handy", "laserFocus", "mechanicalSavant"],
+      benefits: {
+        count: 1,
+        options: ["creativeMind", "handy", "laserFocus", "mechanicalSavant"]
+      },
       burdens: {
         count: 1,
         options: ["absentMinded", "obsessive", "ruleFollower"]
@@ -294,7 +306,10 @@ export const CHARACTER_DATA = {
         effects: {
           attributeBonus: 5,
           gritPenalty: -5,
-          benefits: ['ally', 'businessSavvy', 'wellConnected', 'silverTongue', 'celebrityStatus', 'affluent']
+          benefits: {
+            count: 1,
+            options: ['ally', 'businessSavvy', 'wellConnected', 'silverTongue', 'celebrityStatus', 'affluent']
+          }
         }
       },
       average: {
@@ -304,10 +319,15 @@ export const CHARACTER_DATA = {
       traumatic: {
         name: "Traumatic",
         description: "Life reflects significant challenges and trauma",
-        burdens: ['addiction', 'compulsiveBehavior', 'impulsive', 'killjoy', 'obsessive', 'phobia', 'shortTemper'],
-        benefits: ['handy', 'hiddenRefuge', 'ironBody', 'peakPhysique', 'quickReflexes', 'shadyPast', 'streetUrchin', 'truthSeeker']
+        burdens: {
+          count: 2,
+          options:  ['addiction', 'compulsiveBehavior', 'impulsive', 'killjoy', 'obsessive', 'phobia', 'shortTemper']
+        },
+        benefits: {
+          count: 1,
+          options: ['handy', 'hiddenRefuge', 'ironBody', 'peakPhysique', 'quickReflexes', 'shadyPast', 'streetUrchin', 'truthSeeker']
+        }
       }
     }
   }
-
 };

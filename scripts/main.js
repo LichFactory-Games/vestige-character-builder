@@ -28,7 +28,17 @@ Hooks.once('init', () => {
         return obj?.[key];
       }
       return obj?.[key]?.[prop];
+    },
+    findBenefit: function(benefitId) {
+      const benefit = CHARACTER_DATA.benefits.list.find(b => b.id === benefitId);
+      return benefit || null;
+    },
+    findBurden: function(burdenId) {
+      const burden = CHARACTER_DATA.burdens.list.find(b => b.id === burdenId);
+      return burden || null;
     }
+
+
   });
 
   // Add API to game object
