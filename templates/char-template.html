@@ -199,18 +199,27 @@
         </div>
         {{/each}}
 
+
         <h4>Elective Skills (Choose {{electiveSkills.count}})</h4>
         {{#each electiveSkills.options}}
         <div class="skill-item">
           <label>
-            <input type="checkbox" name="skills.elective" value="{{name}}">
+            <input type="checkbox"
+                   name="skills.elective"
+                   value="{{name}}"
+                   {{#if (includes ../../character.profession.skills.elective name)}}checked{{/if}}>
             {{name}}{{#if type}} ({{type}}){{/if}}
             {{#if requireType}}
-            <input type="text" class="type-input" name="skills.type.{{name}}" placeholder="Specify type...">
+            <input type="text"
+                   class="type-input"
+                   name="skills.type.{{name}}"
+                   placeholder="Specify type..."
+                   value="{{lookup ../../character.profession.skills.electiveTypes name}}">
             {{/if}}
           </label>
         </div>
         {{/each}}
+
         {{/with}}
       </div>
       {{else}}
