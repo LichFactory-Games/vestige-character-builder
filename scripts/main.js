@@ -23,7 +23,8 @@ Hooks.once('init', () => {
     findBurden: burdenId => CHARACTER_DATA.burdens.list.find(b => b.id === burdenId),
     // Changed to regular function for arguments access
     lookup: function(obj, key, prop) {
-      if (arguments.length === 2) {
+      // Check if third arg is Handlebars options object
+      if (prop && prop.name === 'lookup') {
         return obj?.[key];
       }
       return obj?.[key]?.[prop];
