@@ -173,6 +173,14 @@ export class CharacterCreatorDialog extends FormApplication {
       this.render();
     });
 
+    //// DETAILS ////
+    html.find('input[name^="details."], textarea[name^="details."]').change(e => {
+      const field = e.target.name.split('.')[1];
+      this.character.details = this.character.details || {};
+      this.character.details[field] = e.target.value;
+      console.log("Updated details:", this.character.details); // Debug log
+    });
+
   }
 
   _onNavigate(direction) {
@@ -358,7 +366,7 @@ export class CharacterCreatorDialog extends FormApplication {
       ).join('');
 
       const actorData = {
-        name: this.character.details.identity || "New Character",
+        name: this.character.details?.identity || "New Character",
         type: "character",
         system: {
           // Primary attributes
