@@ -1,0 +1,302 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <!-- Navigation Tabs -->
+  <nav class="tabs" data-group="sections">
+    <a class="item" data-tab="attributes">Attributes</a>
+    <a class="item" data-tab="path">Path</a>
+    <a class="item" data-tab="skills">Skills</a>
+    <a class="item" data-tab="benefits">Benefits & Burdens</a>
+    <a class="item" data-tab="ties">Ties</a>
+    <a class="item" data-tab="details">Details</a>
+  </nav>
+
+  <!-- Content Sections -->
+  <section class="content">
+    <!-- Attributes Tab -->
+    <div class="tab" data-tab="attributes" data-group="sections">
+      <div class="form-group">
+        <div class="attribute-controls">
+          <button type="button" class="roll-attributes">
+            <i class="fas fa-dice"></i> Roll Attributes
+          </button>
+          <button type="button" class="use-array">
+            <i class="fas fa-list-ol"></i> Use Array [{{config.attributeArray}}]
+          </button>
+        </div>
+
+        <!-- Primary Attributes -->
+        <div class="primary-attributes">
+          {{#each config.attributes.primary}}
+          <div class="attribute-group">
+            <label>{{this.label}} ({{@key}})</label>
+            <input type="number"
+                   name="attributes.primary.{{@key}}"
+                   value="{{lookup ../character.attributes.primary @key}}"
+                   class="attribute-input"
+                   min="0"
+                   max="100">
+            <p class="hint">{{this.desc}}</p>
+          </div>
+          {{/each}}
+        </div>
+
+        <!-- Secondary Attributes -->
+        <div class="secondary-attributes">
+          <h3>Secondary Attributes</h3>
+          {{#each config.attributes.secondary}}
+          <div class="attribute-group">
+            <label>{{this.label}}</label>
+            <span class="value">{{lookup ../character.attributes.secondary @key}}</span>
+            <p class="hint">{{this.desc}}</p>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Path Tab -->
+    <div class="tab" data-tab="path" data-group="sections">
+      <h2>Choose Your Path</h2>
+
+      <!-- Upbringing Selection -->
+      <div class="upbringing-section">
+        <h3>Upbringing</h3>
+        {{#each config.upbringing.types}}
+        <div class="upbringing-option">
+          <label>
+            <input type="radio"
+                   name="path.upbringing"
+                   value="{{@key}}"
+                   {{#if (eq ../character.path.upbringing @key)}}checked{{/if}}>
+            <strong>{{this.name}}</strong>
+          </label>
+          <p class="description">{{this.description}}</p>
+        </div>
+        {{/each}}
+      </div>
+
+      <!-- Profession Selection -->
+      <div class="profession-section">
+        <h3>Profession</h3>
+        <select name="path.profession">
+          <option value="">Select Profession</option>
+          {{#each config.professions}}
+          <option value="{{@key}}"
+                  {{#if (eq ../character.path.profession @key)}}selected{{/if}}>
+            {{this.name}}
+          </option>
+          {{/each}}
+        </select>
+        <div class="profession-details"></div>
+      </div>
+    </div>
+
+    <!-- Skills Tab -->
+    <div class="tab" data-tab="skills" data-group="sections">
+      <!-- Professional Skills -->
+      <div class="skills-section professional">
+        <h3>Professional Skills</h3>
+        {{#if character.path.profession}}
+        <div class="skills-list">
+          {{#each (lookup config.professions character.path.profession).professionalSkills}}
+          <div class="skill-item">
+            <label>{{this.name}}</label>
+            {{#if this.type}}
+            <span class="type-label">({{this.type}})</span>
+            {{else if this.requireType}}
+            <input type="text"
+                   name="skills.professional.{{@index}}.type"
+                   class="type-input"
+                   placeholder="Enter type"
+                   required>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+        {{else}}
+        <p class="hint">Select a profession to view available skills</p>
+        {{/if}}
+      </div>
+
+      <!-- Elective Skills -->
+      <div class="skills-section elective">
+        <h3>Elective Skills</h3>
+        {{#if character.path.profession}}
+        <div class="skills-list">
+          {{#with (lookup config.professions character.path.profession).electiveSkills}}
+          <p class="hint">Choose {{this.count}} skills:</p>
+          {{#each this.options}}
+          <div class="skill-item">
+            <label>
+              <input type="checkbox"
+                     name="skills.elective"
+                     value="{{this.name}}"
+                     {{#if (includes ../../character.skills.elective this.name)}}checked{{/if}}>
+              {{this.name}}
+            </label>
+            {{#if this.requireType}}
+            <input type="text"
+                   name="skills.electiveType.{{@index}}"
+                   class="type-input"
+                   placeholder="Enter type"
+                   {{#if (includes ../../character.skills.elective this.name)}}required{{/if}}>
+            {{/if}}
+          </div>
+          {{/each}}
+          {{/with}}
+        </div>
+        {{else}}
+        <p class="hint">Select a profession to view elective skills</p>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Benefits & Burdens Tab -->
+    <div class="tab" data-tab="benefits" data-group="sections">
+      <!-- Benefits Section -->
+      <div class="benefits-section">
+        <h3>Benefits</h3>
+        {{#if character.path.profession}}
+        <div class="benefits-list">
+          {{#each (getBenefitsForProfession character.path.profession)}}
+          <div class="benefit-item">
+            <label>
+              <input type="checkbox"
+                     name="benefits"
+                     value="{{this.id}}"
+                     {{#if (includes ../character.benefits this.id)}}checked{{/if}}>
+              <strong>{{this.name}}</strong>
+            </label>
+            <p class="hint">{{this.desc}}</p>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
+
+      <!-- Burdens Section -->
+      <div class="burdens-section">
+        <h3>Burdens</h3>
+        {{#if character.path.profession}}
+        <div class="burdens-list">
+          {{#with (getBurdensForProfession character.path.profession)}}
+          {{#if this.required}}
+          <div class="required-burden">
+            <strong>Required Burden:</strong> {{lookup (findBurden this.required) 'name'}}
+            <p class="hint">{{lookup (findBurden this.required) 'desc'}}</p>
+          </div>
+          {{/if}}
+          {{#if this.options}}
+          <p class="hint">Select {{this.count}} burden(s):</p>
+          {{#each this.options}}
+          <div class="burden-item">
+            <label>
+              <input type="checkbox"
+                     name="burdens"
+                     value="{{this}}"
+                     {{#if (includes ../../character.burdens this)}}checked{{/if}}>
+              <strong>{{lookup (findBurden this) 'name'}}</strong>
+            </label>
+            <p class="hint">{{lookup (findBurden this) 'desc'}}</p>
+          </div>
+          {{/each}}
+          {{/if}}
+          {{/with}}
+        </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Ties Tab -->
+    <div class="tab" data-tab="ties" data-group="sections">
+      <h3>Character Ties</h3>
+      <div class="ties-info">
+        <p>Total Points: {{multiply character.attributes.primary.prs 2}}</p>
+        <p>Points Remaining: <span class="remaining-points">{{character.ties.remaining}}</span></p>
+      </div>
+
+      {{#times (lookup (lookup config.professions character.path.profession) 'ties')}}
+      <div class="tie-entry">
+        <h4>Tie {{add @index 1}}</h4>
+        <div class="form-group">
+          <label>Name:</label>
+          <input type="text" name="ties.{{@index}}.name" value="{{lookup ../character.ties @index 'name'}}">
+        </div>
+        <div class="form-group">
+          <label>Description:</label>
+          <input type="text" name="ties.{{@index}}.desc" value="{{lookup ../character.ties @index 'desc'}}">
+        </div>
+        <div class="form-group">
+          <label>Strength (1-100):</label>
+          <input type="number"
+                 name="ties.{{@index}}.strength"
+                 class="tie-strength"
+                 value="{{default (lookup ../character.ties @index 'strength') 20}}"
+                 min="1"
+                 max="100">
+          <span class="strength-description"></span>
+        </div>
+      </div>
+      {{/times}}
+    </div>
+
+    <!-- Details Tab -->
+    <div class="tab" data-tab="details" data-group="sections">
+      <div class="personal-details">
+        <h3>Personal History</h3>
+        <div class="form-group">
+          <label>Identity:</label>
+          <input type="text" name="details.identity" value="{{character.details.identity}}" placeholder="Name, aliases, etc.">
+        </div>
+        <div class="form-group">
+          <label>Appearance:</label>
+          <textarea name="details.appearance" placeholder="Physical description, style, mannerisms">{{character.details.appearance}}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Origins:</label>
+          <textarea name="details.origins" placeholder="Background and early life">{{character.details.origins}}</textarea>
+        </div>
+      </div>
+
+      <div class="memories">
+        <h3>Memories</h3>
+        <div class="form-group">
+          <label>A Memory You Cling To:</label>
+          <textarea name="details.memoryClingTo" placeholder="A defining positive memory">{{character.details.memoryClingTo}}</textarea>
+        </div>
+        <div class="form-group">
+          <label>A Memory You'd Rather Forget:</label>
+          <textarea name="details.memoryForget" placeholder="A haunting negative memory">{{character.details.memoryForget}}</textarea>
+        </div>
+      </div>
+
+      <div class="additional-details">
+        <h3>Additional Considerations</h3>
+        <div class="form-group">
+          <label>Personal Traits:</label>
+          <textarea name="details.traits" placeholder="Distinctive habits and quirks">{{character.details.traits}}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Beliefs:</label>
+          <textarea name="details.beliefs" placeholder="Philosophical or religious convictions">{{character.details.beliefs}}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Technology:</label>
+          <textarea name="details.technology" placeholder="Relationship with modern technology">{{character.details.technology}}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other tabs will be added as needed -->
+
+  </section>
+
+  <!-- Dialog Buttons -->
+  <div class="dialog-buttons">
+    <button type="button" class="prev-step" {{#if (eq step 1)}}disabled{{/if}}>
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <button type="button" class="next-step">
+      {{#if (eq step 6)}}Complete{{else}}Next <i class="fas fa-arrow-right"></i>{{/if}}
+    </button>
+  </div>
+</form>
