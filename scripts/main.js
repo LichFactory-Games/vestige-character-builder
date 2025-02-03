@@ -1,47 +1,65 @@
 // scripts/main.js
+import { CHARACTER_DATA } from './config/data.js';
+import { CharacterCreatorDialog } from './dialog.js';
+import * as Helpers from './config/helpers.js';
 
-import { ATTRIBUTES } from './config/attributes.js';
-import { BENEFITS } from './config/benefits.js';
-import { BURDENS } from './config/burdens.js';
-import { PROFESSIONS } from './config/professions.js';
-import { UPBRINGING_CONFIG } from './config/upbringing.js';
-import { AttributeDialog } from './views/dialogs/attribute-dialog.js';
-import { PathDialog } from './views/dialogs/path-dialog.js';
-
-Hooks.once('init', async function() {
-  console.log('Initializing Vestige Character Creator');
-
-  // Register module settings
-  game.settings.register('vestige-character-creator', 'character-states', {
-    name: 'Character Creation States',
-    scope: 'client',
-    config: false,
-    type: Object,
-    default: {}
+Hooks.once('init', () => {
+  // Register custom Handlebars helpers
+  Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
   });
 
-  game.vestige = {
-    config: {
-      ATTRIBUTES,
-      BENEFITS,
-      BURDENS,
-      PROFESSIONS,
-      UPBRINGING_CONFIG
-    },
-    dialogs: {
-      AttributeDialog,
-      PathDialog
-    },
-    createCharacter: () => {
-      new AttributeDialog({
-        characterData: {
-          name: "",
-          attributes: {
-            primary: { vgr: 0, grc: 0, ins: 0, prs: 0 },
-            secondary: { hlt: 0, wds: 0, grt: 0, poi: 0 }
-          }
-        }
-      }).render(true);
+  Handlebars.registerHelper('includes', function(array, item) {
+    return Array.isArray(array) && array.includes(item);
+  });
+
+  Handlebars.registerHelper('times', function(n, options) {
+    let result = '';
+    for (let i = 0; i < n; i++) {
+      result += options.fn({ index: i });
     }
+    return result;
+  });
+
+  Handlebars.registerHelper('add', function(a, b) {
+    return parseInt(a) + parseInt(b);
+  });
+
+  Handlebars.registerHelper('multiply', function(a, b) {
+    return parseInt(a) * parseInt(b);
+  });
+
+  Handlebars.registerHelper('default', function(value, defaultValue) {
+    return value != null ? value : defaultValue;
+  });
+
+  Handlebars.registerHelper('getBenefitsForProfession', function(professionKey) {
+    return Helpers.getBenefitsForProfession(professionKey);
+  });
+
+  Handlebars.registerHelper('getBurdensForProfession', function(professionKey) {
+    return Helpers.getBurdensForProfession(professionKey);
+  });
+
+  Handlebars.registerHelper('findBurden', function(burdenId) {
+    return CHARACTER_DATA.burdens.list.find(b => b.id === burdenId);
+  });
+
+  // Lookup helper for nested objects
+  Handlebars.registerHelper('lookup', function(obj, key, prop) {
+    if (arguments.length === 2) {
+      return obj?.[key];
+    }
+    return obj?.[key]?.[prop];
+  });
+
+  // Register module configuration
+  CONFIG.VESTIGE = CHARACTER_DATA;
+
+  // Register module API
+  game.vestige = {
+    createCharacter: () => new CharacterCreatorDialog().render(true),
+    config: CHARACTER_DATA,
+    helpers: Helpers
   };
 });
