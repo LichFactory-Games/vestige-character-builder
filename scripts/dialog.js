@@ -27,7 +27,8 @@ export class CharacterCreatorDialog extends FormApplication {
         burdens: []
       },
       ties: {
-        remaining: 0
+        remaining: 100,
+        entries: []
       },
       details: {}
 
@@ -114,6 +115,30 @@ export class CharacterCreatorDialog extends FormApplication {
       this.character.upbringing.burdens = Array.from(checkedBoxes).map(cb => cb.value);
       this.render();
     });
+
+    // Ties
+    html.find('input.tie-strength').change(e => {
+      // Ensure ties array exists
+      this.character.ties.entries = this.character.ties.entries || [];
+
+      // Get all tie inputs
+      const tieInputs = Array.from(html.find('.tie-entry')).map(entry => ({
+        name: entry.querySelector('input[name*=".name"]').value,
+        desc: entry.querySelector('input[name*=".desc"]').value,
+        strength: parseInt(entry.querySelector('input.tie-strength').value) || 0
+      }));
+
+      // Update character ties data
+      this.character.ties.entries = tieInputs;
+
+      // Calculate total spent and remaining
+      const totalSpent = tieInputs.reduce((sum, tie) => sum + tie.strength, 0);
+      const totalAvailable = this.character.attributes.primary.prs * 2;
+      this.character.ties.remaining = totalAvailable - totalSpent;
+
+      this.render();
+    });
+
   }
 
   _onNavigate(direction) {
@@ -194,6 +219,8 @@ export class CharacterCreatorDialog extends FormApplication {
   _updateSecondaryAttributes() {
     const primary = this.character.attributes.primary;
     this.character.attributes.secondary = CHARACTER_DATA.calculateSecondary(primary);
+    // Update ties remaining based on PRS
+    this.character.ties.remaining = primary.prs * 2;
   }
 
   _getArrayAssignmentHTML(array) {

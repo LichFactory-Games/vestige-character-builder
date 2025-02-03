@@ -9,8 +9,10 @@ Hooks.once('init', () => {
     eq: (a, b) => a === b,
     includes: (array, item) => Array.isArray(array) && array.includes(item),
     times: function(n, options) {
+      console.log('Times helper called with n:', n);
       let result = '';
       for (let i = 0; i < n; i++) {
+        console.log('Iteration:', i);
         result += options.fn({ index: i });
       }
       return result;

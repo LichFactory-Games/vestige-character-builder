@@ -229,27 +229,29 @@
 
       {{#times (lookup (lookup config.professions character.profession.name) 'ties')}}
       <div class="tie-entry">
-        <h4>Tie {{add @index 1}}</h4>
+        <h4>Tie {{add index 1}}</h4>
         <div class="form-group">
           <label>Name:</label>
-          <input type="text" name="ties.{{@index}}.name" value="{{lookup ../character.ties @index 'name'}}">
+          <input type="text" name="ties.{{index}}.name"
+                 value="{{lookup ../character.ties.entries index 'name'}}">
         </div>
         <div class="form-group">
           <label>Description:</label>
-          <input type="text" name="ties.{{@index}}.desc" value="{{lookup ../character.ties @index 'desc'}}">
+          <input type="text" name="ties.{{index}}.desc"
+                 value="{{lookup ../character.ties.entries index 'desc'}}">
         </div>
         <div class="form-group">
           <label>Strength (1-100):</label>
           <input type="number"
-                 name="ties.{{@index}}.strength"
+                 name="ties.{{index}}.strength"
                  class="tie-strength"
-                 value="{{default (lookup ../character.ties @index 'strength') 20}}"
+                 value="{{default (lookup ../character.ties.entries index 'strength') 0}}"
                  min="1"
                  max="100">
-          <span class="strength-description"></span>
         </div>
       </div>
       {{/times}}
+
     </div>
 
     <!-- Details Tab -->
