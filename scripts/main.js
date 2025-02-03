@@ -37,8 +37,6 @@ Hooks.once('init', () => {
       const burden = CHARACTER_DATA.burdens.list.find(b => b.id === burdenId);
       return burden || null;
     }
-
-
   });
 
   // Add API to game object

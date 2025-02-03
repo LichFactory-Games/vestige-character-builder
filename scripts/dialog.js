@@ -3,7 +3,7 @@ import { CHARACTER_DATA } from "./config/data.js";
 
 export class CharacterCreatorDialog extends FormApplication {
   constructor(options = {}) {
-    super(options);
+  super(options);
     this.character = {
       attributes: {
         primary: {
@@ -14,11 +14,23 @@ export class CharacterCreatorDialog extends FormApplication {
         },
         secondary: {}
       },
-      path: {},
+      profession: {
+        name: null,
+        skills: {
+          professional: [],
+          elective: []
+        }
+      },
       upbringing: {
+        type: null,    // for storing easy/average/traumatic
         benefits: [],
         burdens: []
-      }
+      },
+      ties: {
+        remaining: 0
+      },
+      details: {}
+
     };
   }
 
@@ -67,18 +79,14 @@ export class CharacterCreatorDialog extends FormApplication {
     html.find('.use-array').click(e => this._onUseArray(e));
 
     // Path
-    html.find('select[name="path.profession"]').change(e => {
-      this.character.path = this.character.path || {};
-      this.character.path.profession = e.target.value;
+    html.find('select[name="profession.name"]').change(e => {
+      this.character.profession.name = e.target.value;
       this.render();
     });
-
-    html.find('input[name="path.upbringing"]').change(e => {
-      this.character.path = this.character.path || {};
-      this.character.path.upbringing = e.target.value;
+    html.find('input[name="upbringing.type"]').change(e => {
+      this.character.upbringing.type = e.target.value;
       this.render();
     });
-
     html.find('input[name="upbringing.benefits"]').change(e => {
       const maxCount = this.getUpbringingBenefitsCount();
       const checkedBoxes = html.find('input[name="upbringing.benefits"]:checked');
@@ -93,7 +101,6 @@ export class CharacterCreatorDialog extends FormApplication {
       this.character.upbringing.benefits = Array.from(checkedBoxes).map(cb => cb.value);
       this.render();
     });
-
     html.find('input[name="upbringing.burdens"]').change(e => {
       const maxCount = this.getUpbringingBurdensCount();
       const checkedBoxes = html.find('input[name="upbringing.burdens"]:checked');
@@ -103,7 +110,6 @@ export class CharacterCreatorDialog extends FormApplication {
         e.target.checked = false;
         return;
       }
-
       this.character.upbringing = this.character.upbringing || {};
       this.character.upbringing.burdens = Array.from(checkedBoxes).map(cb => cb.value);
       this.render();
@@ -111,7 +117,7 @@ export class CharacterCreatorDialog extends FormApplication {
   }
 
   _onNavigate(direction) {
-    const tabs = ['attributes', 'path', 'skills', 'benefits', 'ties', 'details'];
+    const tabs = ['attributes', 'path', 'skills', 'ties', 'details'];
     const currentTab = this._tabs[0].active;
     const currentIndex = tabs.indexOf(currentTab);
     const newIndex = Math.max(0, Math.min(tabs.length - 1, currentIndex + direction));
@@ -232,7 +238,7 @@ export class CharacterCreatorDialog extends FormApplication {
   }
 
   getUpbringingBenefitsCount() {
-    const upbringing = this.character?.path?.upbringing;
+    const upbringing = this.character?.upbringing?.type;
     if (!upbringing) return 0;
 
     // Access benefits either from effects or directly
@@ -241,7 +247,7 @@ export class CharacterCreatorDialog extends FormApplication {
   }
 
   getUpbringingBurdensCount() {
-    const upbringing = this.character?.path?.upbringing;
+    const upbringing = this.character?.upbringing?.type;
     if (!upbringing) return 0;
 
     const upbringingData = CHARACTER_DATA.upbringing.types[upbringing];

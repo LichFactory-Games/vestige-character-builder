@@ -4,7 +4,6 @@
     <a class="item" data-tab="attributes">Attributes</a>
     <a class="item" data-tab="path">Path</a>
     <a class="item" data-tab="skills">Skills</a>
-    <a class="item" data-tab="benefits">Benefits & Burdens</a>
     <a class="item" data-tab="ties">Ties</a>
     <a class="item" data-tab="details">Details</a>
   </nav>
@@ -64,16 +63,16 @@
         <div class="upbringing-option">
           <label>
             <input type="radio"
-                   name="path.upbringing"
+                   name="upbringing.type"
                    value="{{@key}}"
-                   {{#if (eq ../character.path.upbringing @key)}}checked{{/if}}>
+                   {{#if (eq ../character.upbringing.type @key)}}checked{{/if}}>
             <strong>{{this.name}}</strong>
           </label>
           <p class="description">{{this.description}}</p>
         </div>
         {{/each}}
 
-        {{#with (lookup config.upbringing.types character.path.upbringing)}}
+        {{#with (lookup config.upbringing.types character.upbringing.type)}}
   {{#if effects.benefits}}
   <div class="upbringing-benefits">
     <h4>Choose {{effects.benefits.count}} Benefit(s):</h4>
@@ -152,18 +151,18 @@
       <!-- Profession Selection -->
       <div class="profession-section">
         <h3>Profession</h3>
-        <select name="path.profession">
+        <select name="profession.name">
           <option value="">Select Profession</option>
           {{#each config.professions}}
           <option value="{{@key}}"
-                  {{#if (eq ../character.path.profession @key)}}selected{{/if}}>
+                  {{#if (eq ../character.profession.name @key)}}selected{{/if}}>
             {{this.name}}
           </option>
           {{/each}}
         </select>
-        {{#if character.path.profession}}
+        {{#if character.profession.name}}
         <div class="profession-details">
-          {{#with (lookup config.professions character.path.profession)}}
+          {{#with (lookup config.professions character.profession.name)}}
           <h4>{{name}}</h4>
           <p>{{description}}</p>
           <p><strong>Core Attribute:</strong> {{coreAttribute}}</p>
@@ -186,71 +185,39 @@
     <!-- Skills Tab -->
     <div class="tab" data-tab="skills" data-group="sections">
       <h3>Professional Skills</h3>
-      {{#if character.path.profession}}
+      {{#if character.profession.name}}
       <div class="skills-list">
-        <p>Current Profession: {{character.path.profession}}</p>
+        {{#with (lookup config.professions character.profession.name)}}
+        <p>Current Profession: {{name}}</p>
+
+        <h4>Professional Skills</h4>
+        {{#each professionalSkills}}
+        <div class="skill-item">
+          <label>
+            {{name}}{{#if type}} ({{type}}){{/if}}
+          </label>
+        </div>
+        {{/each}}
+
+        <h4>Elective Skills (Choose {{electiveSkills.count}})</h4>
+        {{#each electiveSkills.options}}
+        <div class="skill-item">
+          <label>
+            <input type="checkbox" name="skills.elective" value="{{name}}">
+            {{name}}{{#if type}} ({{type}}){{/if}}
+            {{#if requireType}}
+            <input type="text" class="type-input" name="skills.type.{{name}}" placeholder="Specify type...">
+            {{/if}}
+          </label>
+        </div>
+        {{/each}}
+        {{/with}}
       </div>
       {{else}}
       <p>Please select a profession first</p>
       {{/if}}
     </div>
 
-
-    <!-- Benefits & Burdens Tab -->
-    <div class="tab" data-tab="benefits" data-group="sections">
-      <!-- Benefits Section -->
-      <div class="benefits-section">
-        <h3>Benefits</h3>
-        {{#if character.path.profession}}
-        <div class="benefits-list">
-          {{#each (getBenefitsForProfession character.path.profession)}}
-          <div class="benefit-item">
-            <label>
-              <input type="checkbox"
-                     name="benefits"
-                     value="{{this.id}}"
-                     {{#if (includes ../character.benefits this.id)}}checked{{/if}}>
-              <strong>{{this.name}}</strong>
-            </label>
-            <p class="hint">{{this.desc}}</p>
-          </div>
-          {{/each}}
-        </div>
-        {{/if}}
-      </div>
-
-      <!-- Burdens Section -->
-      <div class="burdens-section">
-        <h3>Burdens</h3>
-        {{#if character.path.profession}}
-        <div class="burdens-list">
-          {{#with (getBurdensForProfession character.path.profession)}}
-          {{#if this.required}}
-          <div class="required-burden">
-            <strong>Required Burden:</strong> {{lookup (findBurden this.required) 'name'}}
-            <p class="hint">{{lookup (findBurden this.required) 'desc'}}</p>
-          </div>
-          {{/if}}
-          {{#if this.options}}
-          <p class="hint">Select {{this.count}} burden(s):</p>
-          {{#each this.options}}
-          <div class="burden-item">
-            <label>
-              <input type="checkbox"
-                     name="burdens"
-                     value="{{this}}"
-                     {{#if (includes ../../character.burdens this)}}checked{{/if}}>
-              <strong>{{lookup (findBurden this) 'name'}}</strong>
-            </label>
-            <p class="hint">{{lookup (findBurden this) 'desc'}}</p>
-          </div>
-          {{/each}}
-          {{/if}}
-          {{/with}}
-        </div>
-        {{/if}}
-      </div>
-    </div>
 
     <!-- Ties Tab -->
     <div class="tab" data-tab="ties" data-group="sections">
@@ -260,7 +227,7 @@
         <p>Points Remaining: <span class="remaining-points">{{character.ties.remaining}}</span></p>
       </div>
 
-      {{#times (lookup (lookup config.professions character.path.profession) 'ties')}}
+      {{#times (lookup (lookup config.professions character.profession.name) 'ties')}}
       <div class="tie-entry">
         <h4>Tie {{add @index 1}}</h4>
         <div class="form-group">
