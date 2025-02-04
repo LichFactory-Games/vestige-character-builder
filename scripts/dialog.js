@@ -400,7 +400,7 @@ export class CharacterCreatorDialog extends FormApplication {
 
       // Format ties list
       const tiesList = this.character.ties.entries.map(tie =>
-        `<p>- ${tie.name} (Strength: ${tie.strength})</p>`
+        `<p>- ${tie.name} (Strength: ${tie.strength}): ${tie.desc}</p>`
       ).join('');
 
       const actorData = {
