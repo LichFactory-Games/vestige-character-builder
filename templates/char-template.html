@@ -12,16 +12,7 @@
   <section class="content">
     <!-- Attributes Tab -->
     <div class="tab" data-tab="attributes" data-group="sections">
-      <div class="form-group">
-        <div class="attribute-controls">
-          <button type="button" class="roll-attributes">
-            <i class="fas fa-dice"></i> Roll Attributes
-          </button>
-          <button type="button" class="use-array">
-            <i class="fas fa-list-ol"></i> Use Array [{{config.attributeArray}}]
-          </button>
-        </div>
-
+      <div class="attributes-container">
         <!-- Primary Attributes -->
         <div class="primary-attributes">
           {{#each config.attributes.primary}}
@@ -33,22 +24,31 @@
                    class="attribute-input"
                    min="0"
                    max="100">
-            <p class="hint">{{this.desc}}</p>
+            <span class="hint">{{this.desc}}</span>
           </div>
           {{/each}}
         </div>
 
         <!-- Secondary Attributes -->
         <div class="secondary-attributes">
-          <h3>Secondary Attributes</h3>
           {{#each config.attributes.secondary}}
           <div class="attribute-group">
             <label>{{this.label}}</label>
             <span class="value">{{lookup ../character.attributes.secondary @key}}</span>
-            <p class="hint">{{this.desc}}</p>
+            <span class="hint">{{this.desc}}</span>
           </div>
           {{/each}}
         </div>
+      </div>
+
+      <!-- Generation Controls -->
+      <div class="attribute-controls">
+        <button type="button" class="roll-attributes">
+          <i class="fas fa-dice"></i> Roll Attributes
+        </button>
+        <button type="button" class="use-array">
+          <i class="fas fa-list-ol"></i> Use Array [{{config.attributeArray}}]
+        </button>
       </div>
     </div>
 
@@ -72,80 +72,94 @@
         </div>
         {{/each}}
 
+        {{#if (eq character.upbringing.type "easy")}}
+        <div class="attribute-bonus">
+          <h4>Attribute Bonus (+5%)</h4>
+          <select name="upbringing.attributeBonus">
+            <option value="">Select Attribute</option>
+            {{#each config.attributes.primary}}
+            <option value="{{@key}}"
+                    {{#if (eq ../character.upbringing.attributeBonus @key)}}selected{{/if}}>
+              {{this.label}}
+            </option>
+            {{/each}}
+          </select>
+        </div>
+        {{/if}}
+
         {{#with (lookup config.upbringing.types character.upbringing.type)}}
-  {{#if effects.benefits}}
-  <div class="upbringing-benefits">
-    <h4>Choose {{effects.benefits.count}} Benefit(s):</h4>
-    {{#each effects.benefits.options}}
-    <div class="benefit-option">
-      <label>
-        <input type="checkbox"
-               name="upbringing.benefits"
-               value="{{this}}"
-               {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
-        {{#with (findBenefit this)}}
-          {{name}}
-        {{/with}}
-      </label>
-      <p class="hint">
-        {{#with (findBenefit this)}}
-          {{desc}}
-        {{/with}}
-      </p>
-    </div>
-    {{/each}}
-  </div>
-  {{/if}}
+        {{#if effects.benefits}}
+        <div class="upbringing-benefits">
+          <h4>Choose {{effects.benefits.count}} Benefit(s):</h4>
+          {{#each effects.benefits.options}}
+          <div class="benefit-option">
+            <label>
+              <input type="checkbox"
+                     name="upbringing.benefits"
+                     value="{{this}}"
+                     {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
+              {{#with (findBenefit this)}}
+              {{name}}
+              {{/with}}
+            </label>
+            <p class="hint">
+              {{#with (findBenefit this)}}
+              {{desc}}
+              {{/with}}
+            </p>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
 
-  {{#if benefits}} {{!-- For traumatic upbringing --}}
-  <div class="upbringing-benefits">
-    <h4>Choose {{benefits.count}} Benefit(s):</h4>
-    {{#each benefits.options}}
-    <div class="benefit-option">
-      <label>
-        <input type="checkbox"
-               name="upbringing.benefits"
-               value="{{this}}"
-               {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
-        {{#with (findBenefit this)}}
-          {{name}}
-        {{/with}}
-      </label>
-      <p class="hint">
-        {{#with (findBenefit this)}}
-          {{desc}}
-        {{/with}}
-      </p>
-    </div>
-    {{/each}}
-  </div>
-  {{/if}}
+        {{#if benefits}}
+        <div class="upbringing-benefits">
+          <h4>Choose {{benefits.count}} Benefit(s):</h4>
+          {{#each benefits.options}}
+          <div class="benefit-option">
+            <label>
+              <input type="checkbox"
+                     name="upbringing.benefits"
+                     value="{{this}}"
+                     {{#if (includes ../../character.upbringing.benefits this)}}checked{{/if}}>
+              {{#with (findBenefit this)}}
+              {{name}}
+              {{/with}}
+            </label>
+            <p class="hint">
+              {{#with (findBenefit this)}}
+              {{desc}}
+              {{/with}}
+            </p>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
 
-  {{#if burdens}}
-  <div class="upbringing-burdens">
-    <h4>Choose {{burdens.count}} Burden(s):</h4>
-    {{#each burdens.options}}
-    <div class="burden-option">
-      <label>
-        <input type="checkbox"
-               name="upbringing.burdens"
-               value="{{this}}"
-               {{#if (includes ../../character.upbringing.burdens this)}}checked{{/if}}>
-        {{#with (findBurden this)}}
-          {{name}}
+        {{#if burdens}}
+        <div class="upbringing-burdens">
+          <h4>Choose {{burdens.count}} Burden(s):</h4>
+          {{#each burdens.options}}
+          <div class="burden-option">
+            <label>
+              <input type="checkbox"
+                     name="upbringing.burdens"
+                     value="{{this}}"
+                     {{#if (includes ../../character.upbringing.burdens this)}}checked{{/if}}>
+              {{#with (findBurden this)}}
+              {{name}}
+              {{/with}}
+            </label>
+            <p class="hint">
+              {{#with (findBurden this)}}
+              {{desc}}
+              {{/with}}
+            </p>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
         {{/with}}
-      </label>
-      <p class="hint">
-        {{#with (findBurden this)}}
-          {{desc}}
-        {{/with}}
-      </p>
-    </div>
-    {{/each}}
-  </div>
-  {{/if}}
-{{/with}}
-
       </div>
 
       <!-- Profession Selection -->
@@ -160,6 +174,7 @@
           </option>
           {{/each}}
         </select>
+
         {{#if character.profession.name}}
         <div class="profession-details">
           {{#with (lookup config.professions character.profession.name)}}
@@ -168,6 +183,57 @@
           <p><strong>Core Attribute:</strong> {{coreAttribute}}</p>
           <p><strong>Resources:</strong> {{resources}} ({{resourceDesc}})</p>
           <p><strong>Ties:</strong> {{ties}} ({{tiesDesc}})</p>
+
+          {{#if benefits}}
+          <div class="profession-benefits">
+            <h4>Choose One Benefit:</h4>
+            {{#each benefits.options}}
+            <div class="benefit-option">
+              <label>
+                <input type="radio"
+                       name="profession.benefit"
+                       value="{{this}}"
+                       {{#if (eq ../../character.profession.benefit this)}}checked{{/if}}>
+                {{#with (findBenefit this)}}
+                {{name}} - {{desc}}
+                {{/with}}
+              </label>
+            </div>
+            {{/each}}
+          </div>
+          {{/if}}
+
+          {{#if burdens}}
+          <div class="profession-burdens">
+            {{#if burdens.required}}
+            <h4>Required Burden:</h4>
+            {{#each burdens.required}}
+            <div class="burden-option">
+              {{#with (findBurden this)}}
+              <p><strong>{{name}}</strong> - {{desc}}</p>
+              {{/with}}
+            </div>
+            {{/each}}
+            {{/if}}
+
+            {{#if burdens.count}}
+            <h4>Choose {{burdens.count}} Additional Burden(s):</h4>
+            {{#each burdens.options}}
+            <div class="burden-option">
+              <label>
+                <input type="radio"
+                       name="profession.burden"
+                       value="{{this}}"
+                       {{#if (eq ../../character.profession.burden this)}}checked{{/if}}>
+                {{#with (findBurden this)}}
+                {{name}} - {{desc}}
+                {{/with}}
+              </label>
+            </div>
+            {{/each}}
+            {{/if}}
+          </div>
+          {{/if}}
 
           <h4>Equipment</h4>
           <ul>

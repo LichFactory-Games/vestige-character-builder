@@ -23,6 +23,7 @@ export class CharacterCreatorDialog extends FormApplication {
       },
       upbringing: {
         type: null,    // for storing easy/average/traumatic
+        attributeBonus: null,
         benefits: [],
         burdens: []
       },
@@ -149,6 +150,29 @@ export class CharacterCreatorDialog extends FormApplication {
       this.character.upbringing.burdens = Array.from(checkedBoxes).map(cb => cb.value);
       this.render();
     });
+
+    html.find('select[name="upbringing.attributeBonus"]').change(e => {
+      const oldBonus = this.character.upbringing.attributeBonus;
+      if (oldBonus) {
+        this.character.attributes.primary[oldBonus] -= 5;
+      }
+      const newBonus = e.target.value;
+      this.character.upbringing.attributeBonus = newBonus;
+      if (newBonus) {
+        this.character.attributes.primary[newBonus] += 5;
+      }
+      this._updateSecondaryAttributes();
+      this.render();
+    });
+
+    html.find('input[name="profession.benefit"]').change(e => {
+      this.character.profession.benefit = e.target.value;
+    });
+
+    html.find('input[name="profession.burden"]').change(e => {
+      this.character.profession.burden = e.target.value;
+    });
+
 
     // Ties
     html.find('input.tie-strength').change(e => {
@@ -282,6 +306,12 @@ export class CharacterCreatorDialog extends FormApplication {
   _updateSecondaryAttributes() {
     const primary = this.character.attributes.primary;
     this.character.attributes.secondary = CHARACTER_DATA.calculateSecondary(primary);
+
+    // Apply Easy upbringing Grit penalty if applicable
+    if (this.character.upbringing.type === "easy") {
+      this.character.attributes.secondary.grt -= 5;
+    }
+
     // Update ties remaining based on PRS
     this.character.ties.remaining = primary.prs * 2;
   }
@@ -342,6 +372,14 @@ export class CharacterCreatorDialog extends FormApplication {
 
     const upbringingData = CHARACTER_DATA.upbringing.types[upbringing];
     return upbringingData?.burdens?.count || 0;
+  }
+
+  _handleEasyUpbringingBonus(html) {
+    const selectedAttr = html.find('select[name="easyBonus"]').val();
+    if (selectedAttr) {
+      this.character.attributes.primary[selectedAttr] += 5;
+      this._updateSecondaryAttributes();
+    }
   }
 
   // Create Actor ///

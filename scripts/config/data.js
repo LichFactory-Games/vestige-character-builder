@@ -140,7 +140,11 @@ export const CHARACTER_DATA = {
         count: 1,
         options: ["fleetOfFoot", "ironBody", "quickReflexes", "sharpSenses", "unshakableNerves"]
       },
-      burdens: { required: ["duty"] },
+      burdens: {
+        required: ["duty"],  // Required burden
+        count: 0,           // No additional burdens to choose
+        options: []         // Empty since burden is required
+      },
       resources: 40,
       resourceDesc: "Stable; Restricted government salary and equipment",
       ties: 2,
