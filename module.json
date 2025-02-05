@@ -2,7 +2,7 @@
   "id": "vestige-character-creator",
   "title": "Vestige Character Creator",
   "description": "A character creation system for the Vestige RPG",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": {
     "minimum": "11",
     "verified": "12"
@@ -23,14 +23,16 @@
     "styles/style.css"
   ],
   "relationships": {
-    "systems": [{
-      "id": "core100",
-      "type": "system",
-      "manifest": "https://raw.githubusercontent.com/LichFactory-Games/core100/refs/heads/main/system.json"
-    }]
+    "systems": [
+      {
+        "id": "core100",
+        "type": "system",
+        "manifest": "https://raw.githubusercontent.com/LichFactory-Games/core100/refs/heads/main/system.json"
+      }
+    ]
   },
   "socket": false,
   "url": "https://github.com/lichfactory-games/vestige-character-creator",
-  "manifest": "https://raw.githubusercontent.com/lichfactory-games/vestige-character-creator/master/module.json",
-  "download": "https://github.com/lichfactory-games/vestige-character-creator/releases/download/1.0.0/vestige-character-creator.zip"
+  "manifest": "https://github.com/LichFactory-Games/vestige-character-builder/releases/download/v0.2.0/module.json",
+  "download": "https://github.com/LichFactory-Games/vestige-character-builder/releases/download/v0.2.0/vestige-character-creator-v0.2.0.zip"
 }
