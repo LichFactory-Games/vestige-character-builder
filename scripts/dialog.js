@@ -101,6 +101,7 @@ export class CharacterCreatorDialog extends FormApplication {
 
       this.render();
     });
+
     html.find('input[name="skills.elective"]').change(e => {
       const checkedBoxes = html.find('input[name="skills.elective"]:checked');
       const maxElectives = CHARACTER_DATA.professions[this.character.profession.name].electiveSkills.count;
@@ -111,13 +112,33 @@ export class CharacterCreatorDialog extends FormApplication {
         return;
       }
 
-      // Update elective skills array with skill names
-      this.character.profession.skills.elective = Array.from(checkedBoxes).map(cb => cb.value);
+      // Initialize arrays if needed
+      this.character.profession.skills.elective = [];
+      this.character.profession.skills.types = this.character.profession.skills.types || {};
 
-      console.log("Updated elective skills:", this.character.profession.skills.elective);
+      // Update elective skills array
+      checkedBoxes.each((i, box) => {
+        const skillName = box.value;
+        this.character.profession.skills.elective.push(skillName);
+
+        // Handle specialization if needed
+        if (box.dataset.requiresType === 'true') {
+          const typeInput = html.find(`input[name="skills.types.${skillName}"]`).val();
+          this.character.profession.skills.types[skillName] = typeInput;
+        }
+      });
 
       this.render();
     });
+
+
+    // Add handler for type inputs
+    html.find('.type-input').change(e => {
+      const skillName = e.target.name.split('.')[2];
+      this.character.profession.skills.types = this.character.profession.skills.types || {};
+      this.character.profession.skills.types[skillName] = e.target.value;
+    });
+
 
     html.find('input[name="upbringing.type"]').change(e => {
       this.character.upbringing.type = e.target.value;
@@ -305,14 +326,7 @@ export class CharacterCreatorDialog extends FormApplication {
 
   _updateSecondaryAttributes() {
     const primary = this.character.attributes.primary;
-    this.character.attributes.secondary = CHARACTER_DATA.calculateSecondary(primary);
-
-    // Apply Easy upbringing Grit penalty if applicable
-    if (this.character.upbringing.type === "easy") {
-      this.character.attributes.secondary.grt -= 5;
-    }
-
-    // Update ties remaining based on PRS
+    this.character.attributes.secondary = CHARACTER_DATA.calculateSecondary(primary, this.character.upbringing.type);
     this.character.ties.remaining = primary.prs * 2;
   }
 
@@ -407,6 +421,9 @@ export class CharacterCreatorDialog extends FormApplication {
         name: this.character.details?.identity || "New Character",
         type: "character",
         system: {
+          flags: {
+            easyUpbringing: this.character.upbringing.type === "easy"
+          },
           // Primary attributes
           primaryAttributes: {
             vgr: { value: this.character.attributes.primary.vgr, label: "Vigor" },
@@ -414,12 +431,14 @@ export class CharacterCreatorDialog extends FormApplication {
             ins: { value: this.character.attributes.primary.ins, label: "Insight" },
             prs: { value: this.character.attributes.primary.prs, label: "Presence" }
           },
+
           // Secondary attributes
           derivedAttributes: {
-            hlt: { value: this.character.attributes.secondary.hlt, max: this.character.attributes.secondary.hlt, label: "Health" },
-            wds: { value: this.character.attributes.secondary.wds, max: this.character.attributes.secondary.wds, label: "Wounds" },
-            grt: { value: this.character.attributes.secondary.grt, max: this.character.attributes.secondary.grt, label: "Grit" },
-            poi: { value: this.character.attributes.secondary.poi, max: this.character.attributes.secondary.poi, label: "Poise" }
+            hlt: { value: this.character.attributes.secondary.hlt, max: this.character.attributes.secondary.hlt },
+            wds: { value: this.character.attributes.secondary.wds, max: this.character.attributes.secondary.wds },
+            grt: {
+              value: this.character.attributes.secondary.grt.value, max: this.character.attributes.secondary.grt.value},
+            poi: { value: this.character.attributes.secondary.poi, max: this.character.attributes.secondary.poi }
           },
 
           // Equipment section
@@ -525,33 +544,32 @@ export class CharacterCreatorDialog extends FormApplication {
 
 
       // Process elective skills
-      // Process elective skills
-for (const skillName of this.character.profession.skills.elective) {
-  const compendiumSkill = allSkills.find(s => s.name === skillName);
-  if (compendiumSkill) {
-    const skillData = {
-      name: skillName,
-      type: "skill",
-      img: "icons/svg/book.svg",
-      system: {
-        area: compendiumSkill.system.area,
-        governing: compendiumSkill.system.governing,
-        difficulty: compendiumSkill.system.difficulty,
-        description: compendiumSkill.system.description,
-        successNumber: 0,
-        specializations: []
+      for (const skillName of this.character.profession.skills.elective) {
+        const compendiumSkill = allSkills.find(s => s.name === skillName);
+        if (compendiumSkill) {
+          const skillType = this.character.profession.skills.types?.[skillName];
+          const skillData = {
+            name: skillType ? `${skillName} (${skillType})` : skillName,
+            type: "skill",
+            img: "icons/svg/book.svg",
+            system: {
+              area: compendiumSkill.system.area,
+              governing: compendiumSkill.system.governing,
+              difficulty: compendiumSkill.system.difficulty,
+              description: compendiumSkill.system.description,
+              successNumber: 0,
+              specializations: []
+            }
+          };
+          skillsToCreate.push(skillData);
+        }
       }
-    };
-    skillsToCreate.push(skillData);
-  }
-}
 
       // Create all skills as embedded items
       if (skillsToCreate.length > 0) {
         const createdSkills = await actor.createEmbeddedDocuments("Item", skillsToCreate);
         console.log("Created skills:", createdSkills);
       }
-
 
       // Show success dialog
       await Dialog.prompt({

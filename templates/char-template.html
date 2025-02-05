@@ -30,16 +30,20 @@
         </div>
 
         <!-- Secondary Attributes -->
-        <div class="secondary-attributes">
-          {{#each config.attributes.secondary}}
-          <div class="attribute-group">
-            <label>{{this.label}}</label>
-            <span class="value">{{lookup ../character.attributes.secondary @key}}</span>
-            <span class="hint">{{this.desc}}</span>
-          </div>
-          {{/each}}
-        </div>
-      </div>
+<div class="secondary-attributes">
+  {{#each config.attributes.secondary}}
+  <div class="attribute-group">
+    <label>{{this.label}}</label>
+    {{#if (eq @key 'grt')}}
+      <span class="value">{{../character.attributes.secondary.grt.value}}</span>
+    {{else}}
+      <span class="value">{{lookup ../character.attributes.secondary @key}}</span>
+    {{/if}}
+    <span class="hint">{{this.desc}}</span>
+  </div>
+  {{/each}}
+</div>
+</div>
 
       <!-- Generation Controls -->
       <div class="attribute-controls">
@@ -273,14 +277,15 @@
             <input type="checkbox"
                    name="skills.elective"
                    value="{{name}}"
+                   data-requires-type="{{requireType}}"
                    {{#if (includes ../../character.profession.skills.elective name)}}checked{{/if}}>
-            {{name}}{{#if type}} ({{type}}){{/if}}
+            {{name}}
             {{#if requireType}}
             <input type="text"
                    class="type-input"
-                   name="skills.type.{{name}}"
+                   name="skills.types.{{name}}"
                    placeholder="Specify type..."
-                   value="{{lookup ../../character.profession.skills.electiveTypes name}}">
+                   value="{{lookup ../../character.profession.skills.types name}}">
             {{/if}}
           </label>
         </div>

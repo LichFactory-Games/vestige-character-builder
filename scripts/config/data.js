@@ -22,12 +22,21 @@ export const CHARACTER_DATA = {
   attributeArray: [65, 55, 50, 45],
 
   // Attribute calculation functions
-  calculateSecondary: (primary) => ({
-    hlt: Math.floor(primary.vgr / 5),
-    wds: Math.floor(primary.vgr / 25),
-    grt: Math.floor((primary.vgr + primary.prs) / 5),
-    poi: Math.floor((primary.ins + Math.floor((primary.vgr + primary.prs) / 5)) / 5)
-  }),
+  calculateSecondary: (primary, upbringing) => {
+    const baseGrit = Math.floor((primary.vgr + primary.prs) / 5);
+    const penalty = upbringing === 'easy' ? 5 : 0;
+    const gritValue = baseGrit - penalty;
+
+    return {
+      hlt: Math.floor(primary.vgr / 5),
+      wds: Math.floor(primary.vgr / 25),
+      grt: {
+        value: gritValue,
+        max: gritValue
+      },
+      poi: Math.floor((primary.ins + baseGrit) / 5)
+    };
+  },
 
   // Benfits Data //
   benefits: {
